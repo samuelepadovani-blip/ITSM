@@ -26,27 +26,72 @@ export interface AssetInfo {
   description: string;
 }
 
+export type TechnicianId = 'piccirilli' | 'benin' | 'padovani' | 'ayoub' | 'all';
+export type AccountId = string;
+
+export interface TechnicianPermissions {
+  t1: boolean;
+  t2: boolean;
+  t3Vendor: boolean;
+  coordination: boolean;
+}
+
+export interface UserAccount {
+  id: string;
+  username: string;
+  displayName: string;
+  role: string;
+  type: 'reporter' | 'technician';
+  level: string;
+  technicianId?: string;
+  category: AssetCategory | 'Operazioni Generali';
+  competencyDescription: string;
+  canCallVendors: boolean;
+  avatarColor: string;
+  email: string;
+  password?: string;
+  permissions?: TechnicianPermissions;
+}
+
+export interface TransferInfo {
+  transferredAtIso: string;
+  fromTechnicianId: string;
+  fromName: string;
+  toTechnicianId: string;
+  toName: string;
+  targetLevel: string;
+  reason: string;
+  escalatedToT3?: boolean;
+}
+
 export interface ITSMTicket {
   id: string;
   ticketId: string;
   timestamp: string;
+  createdAtIso?: string;
+  reporterName?: string;
+  reporterZone?: string;
+  reporterContact?: string;
   userMessage: string;
   asset: string;
   category: string;
   priority: PriorityLevel;
   sla: string;
   assignedTo: string;
+  assignedTechnicianId?: 'piccirilli' | 'benin' | 'padovani' | 'ayoub';
   escalationT3: boolean;
   escalationT3Note: string;
   actionRequired: string;
-  rawResponse: string;
+  rawResponse?: string;
   status: TicketStatus;
   updatedAt?: string;
+  notes?: string[];
   history?: Array<{
     timestamp: string;
     action: string;
     by: string;
   }>;
+  lastTransfer?: TransferInfo;
 }
 
 export interface SLADefinition {

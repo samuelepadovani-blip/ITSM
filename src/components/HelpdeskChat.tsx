@@ -21,12 +21,18 @@ interface HelpdeskChatProps {
   onNewTicketCreated: (ticket: ITSMTicket) => void;
   onStatusChange: (ticketId: string, newStatus: TicketStatus) => void;
   allTickets: ITSMTicket[];
+  initialPrompt?: string | null;
+  onClearInitialPrompt?: () => void;
+  activeTicketContext?: ITSMTicket | null;
 }
 
 export const HelpdeskChat: React.FC<HelpdeskChatProps> = ({
   onNewTicketCreated,
   onStatusChange,
   allTickets,
+  initialPrompt,
+  onClearInitialPrompt,
+  activeTicketContext,
 }) => {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
@@ -42,6 +48,8 @@ export const HelpdeskChat: React.FC<HelpdeskChatProps> = ({
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const isTypingRef = useRef(false);
+  isTypingRef.current = isTyping;
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -51,9 +59,20 @@ export const HelpdeskChat: React.FC<HelpdeskChatProps> = ({
     scrollToBottom();
   }, [messages, isTyping]);
 
+  useEffect(() => {
+    if (initialPrompt && initialPrompt.trim().length > 0) {
+      const text = initialPrompt.trim();
+      onClearInitialPrompt?.();
+      const timer = setTimeout(() => {
+        handleSendMessage(text);
+      }, 60);
+      return () => clearTimeout(timer);
+    }
+  }, [initialPrompt]);
+
   const handleSendMessage = async (textToSend?: string) => {
     const messageContent = (textToSend || inputValue).trim();
-    if (!messageContent || isTyping) return;
+    if (!messageContent || isTypingRef.current) return;
 
     const userMsgId = `user-${Date.now()}`;
     const newUserMsg: ChatMessage = {
@@ -74,6 +93,7 @@ export const HelpdeskChat: React.FC<HelpdeskChatProps> = ({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: messageContent,
+          ticketContext: activeTicketContext || undefined,
         }),
       });
 
@@ -84,17 +104,19 @@ export const HelpdeskChat: React.FC<HelpdeskChatProps> = ({
         const botMsg: ChatMessage = {
           id: `bot-${Date.now()}`,
           sender: 'assistant',
-          text: data.reply || 'Segnalazione elaborata con successo.',
+          text: data.reply || 'Segnalazione presa in carico con successo.',
           timestamp: new Date().toISOString(),
           ticket: data.ticket ? {
             ...data.ticket,
-            id: `ticket-${Date.now()}`,
-            userMessage: messageContent,
-            status: data.ticket.escalationT3 ? 'Escalato T3' : 'Aperto',
+            id: activeTicketContext ? activeTicketContext.id : `ticket-${Date.now()}`,
+            ticketId: activeTicketContext ? activeTicketContext.ticketId : data.ticket.ticketId,
+            userMessage: activeTicketContext ? activeTicketContext.userMessage : messageContent,
+            status: activeTicketContext ? (activeTicketContext.status === 'Aperto' ? 'In Lavorazione' : activeTicketContext.status) : (data.ticket.escalationT3 ? 'Escalato T3' : 'Aperto'),
           } : undefined,
         };
 
-        if (botMsg.ticket) {
+        // Only register as new ticket if not already an existing active ticket
+        if (botMsg.ticket && !activeTicketContext) {
           onNewTicketCreated(botMsg.ticket);
         }
 
@@ -111,12 +133,19 @@ export const HelpdeskChat: React.FC<HelpdeskChatProps> = ({
       const botMsg: ChatMessage = {
         id: `bot-${Date.now()}`,
         sender: 'assistant',
-        text: `Segnalazione elaborata con il motore di regole ITSM:\n\n${localTicket.rawResponse}`,
+        text: `Presa in carico ed elaborazione con motore di regole ITSM:\n\n${localTicket.rawResponse}`,
         timestamp: new Date().toISOString(),
-        ticket: localTicket,
+        ticket: activeTicketContext ? {
+          ...localTicket,
+          id: activeTicketContext.id,
+          ticketId: activeTicketContext.ticketId,
+          status: activeTicketContext.status === 'Aperto' ? 'In Lavorazione' : activeTicketContext.status,
+        } : localTicket,
       };
 
-      onNewTicketCreated(localTicket);
+      if (!activeTicketContext) {
+        onNewTicketCreated(localTicket);
+      }
       setMessages((prev) => [...prev, botMsg]);
     } finally {
       setIsTyping(false);
@@ -195,6 +224,24 @@ export const HelpdeskChat: React.FC<HelpdeskChatProps> = ({
         </div>
       </div>
 
+      {/* Active Ticket Context Banner (when navigating from a ticket) */}
+      {activeTicketContext && (
+        <div className="bg-gradient-to-r from-indigo-950/90 via-blue-950/80 to-slate-900 border-b border-indigo-500/40 px-5 py-2.5 flex flex-wrap items-center justify-between gap-3 text-xs shadow-inner">
+          <div className="flex items-center gap-2 text-indigo-200">
+            <Sparkles className="h-4 w-4 text-cyan-400 shrink-0 animate-pulse" />
+            <span>
+              <strong>Presa in carico attiva per il Ticket</strong> <strong className="text-white font-mono bg-indigo-900/80 px-1.5 py-0.5 rounded border border-indigo-500/40">#{activeTicketContext.ticketId}</strong>: <span className="text-cyan-300 font-semibold">{activeTicketContext.asset}</span> ({activeTicketContext.category} • Priorità {activeTicketContext.priority})
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] text-emerald-300 font-medium bg-emerald-950/60 border border-emerald-500/40 px-2.5 py-0.5 rounded-full flex items-center gap-1.5 shadow-sm">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+              ⚡ Richiesta inviata: Generazione passaggi di soluzione
+            </span>
+          </div>
+        </div>
+      )}
+
       {/* Rules Notice Badge */}
       <div className="bg-gradient-to-r from-blue-950/40 via-purple-950/30 to-indigo-950/40 border-b border-slate-800/60 px-5 py-2 text-xs text-slate-300 flex items-center justify-between gap-4">
         <div className="flex items-center gap-2">
@@ -271,9 +318,13 @@ export const HelpdeskChat: React.FC<HelpdeskChatProps> = ({
               <Bot className="h-4 w-4" />
             </div>
             <div className="rounded-2xl rounded-bl-xs border border-slate-700/60 bg-slate-800/90 px-4 py-3 shadow-md flex items-center gap-2">
-              <div className="flex items-center gap-1.5 text-xs text-slate-400">
+              <div className="flex items-center gap-1.5 text-xs text-slate-300">
                 <Sparkles className="h-3.5 w-3.5 text-cyan-400 animate-pulse" />
-                <span>Analisi asset, severità e routing in corso...</span>
+                <span>
+                  {activeTicketContext
+                    ? `L'Assistente AI ha preso in carico il Ticket #${activeTicketContext.ticketId} e sta elaborando la serie di passaggi per risolverlo...`
+                    : 'Analisi asset, severità e routing in corso...'}
+                </span>
               </div>
               <div className="flex gap-1 ml-2">
                 <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-bounce"></span>

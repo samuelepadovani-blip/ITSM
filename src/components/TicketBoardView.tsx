@@ -16,11 +16,13 @@ import {
 interface TicketBoardViewProps {
   tickets: ITSMTicket[];
   onStatusChange: (ticketId: string, newStatus: TicketStatus) => void;
+  onAskAI?: (ticket: ITSMTicket) => void;
 }
 
 export const TicketBoardView: React.FC<TicketBoardViewProps> = ({
   tickets,
   onStatusChange,
+  onAskAI,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState<string>('Tutte');
@@ -212,6 +214,7 @@ export const TicketBoardView: React.FC<TicketBoardViewProps> = ({
                 key={ticket.id || ticket.ticketId}
                 ticket={ticket}
                 onStatusChange={onStatusChange}
+                onAskAI={onAskAI}
               />
             ))}
           </div>

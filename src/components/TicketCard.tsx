@@ -9,18 +9,21 @@ import {
   UserCheck, 
   ShieldAlert, 
   FileText,
-  ChevronDown
+  ChevronDown,
+  Sparkles
 } from 'lucide-react';
 
 interface TicketCardProps {
   ticket: ITSMTicket;
   onStatusChange?: (ticketId: string, newStatus: TicketStatus) => void;
+  onAskAI?: (ticket: ITSMTicket) => void;
   compact?: boolean;
 }
 
 export const TicketCard: React.FC<TicketCardProps> = ({
   ticket,
   onStatusChange,
+  onAskAI,
   compact = false,
 }) => {
   const [copied, setCopied] = useState(false);
@@ -118,6 +121,18 @@ export const TicketCard: React.FC<TicketCardProps> = ({
               </>
             )}
           </button>
+
+          {onAskAI && (
+            <button
+              id={`btn-ask-ai-${ticket.ticketId}`}
+              onClick={() => onAskAI(ticket)}
+              className="flex items-center gap-1.5 rounded-lg border border-indigo-500/40 bg-indigo-950/40 px-2.5 py-1 text-xs font-medium text-indigo-300 transition hover:bg-indigo-900/60 hover:border-indigo-400 hover:text-white"
+              title="Inoltra questa segnalazione all'Assistente AI per diagnosi e risposte automatiche"
+            >
+              <Sparkles className="h-3.5 w-3.5 text-indigo-400" />
+              <span>Chiedi all'AI</span>
+            </button>
+          )}
 
           {onStatusChange && (
             <div className="relative inline-block text-left">
