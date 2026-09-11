@@ -27,7 +27,13 @@ import {
   Lock,
   Users,
   LogOut,
-  ShieldCheck
+  ShieldCheck,
+  Filter,
+  Search,
+  X,
+  KeyRound,
+  UserPlus,
+  Crown
 } from 'lucide-react';
 
 interface TechnicianInboxViewProps {
@@ -42,6 +48,8 @@ interface TechnicianInboxViewProps {
   soundEnabled: boolean;
   onToggleSound: () => void;
   lastArrivedTicketId?: string | null;
+  onOpenAdminRegisterModal?: () => void;
+  onOpenChangePasswordModal?: () => void;
 }
 
 export const TechnicianInboxView: React.FC<TechnicianInboxViewProps> = ({
@@ -56,8 +64,12 @@ export const TechnicianInboxView: React.FC<TechnicianInboxViewProps> = ({
   soundEnabled,
   onToggleSound,
   lastArrivedTicketId,
+  onOpenAdminRegisterModal,
+  onOpenChangePasswordModal,
 }) => {
   const [activeTab, setActiveTab] = useState<'pending' | 'resolved' | 't3'>('pending');
+  const [filterPriority, setFilterPriority] = useState<string>('Tutte');
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const [noteInputs, setNoteInputs] = useState<Record<string, string>>({});
   const [vendorRefInputs, setVendorRefInputs] = useState<Record<string, string>>({});
 
@@ -144,6 +156,33 @@ export const TechnicianInboxView: React.FC<TechnicianInboxViewProps> = ({
     }
   };
 
+  // Tab bar
+  const currentTabTickets = activeTab === 'pending'
+    ? pendingTickets
+    : activeTab === 'resolved'
+    ? resolvedTickets
+    : t3Tickets;
+
+  // Counts for each priority within current tab
+  const countTutte = currentTabTickets.length;
+  const countP1 = currentTabTickets.filter((t) => t.priority === 'P1').length;
+  const countP2 = currentTabTickets.filter((t) => t.priority === 'P2').length;
+  const countP3 = currentTabTickets.filter((t) => t.priority === 'P3').length;
+  const countP4 = currentTabTickets.filter((t) => t.priority === 'P4').length;
+
+  // Filtered tickets based on priority and search query
+  const displayedTickets = currentTabTickets.filter((t) => {
+    const matchesPriority = filterPriority === 'Tutte' || t.priority === filterPriority;
+    const q = searchQuery.trim().toLowerCase();
+    const matchesSearch = !q ||
+      t.ticketId.toLowerCase().includes(q) ||
+      t.asset.toLowerCase().includes(q) ||
+      t.actionRequired.toLowerCase().includes(q) ||
+      t.userMessage.toLowerCase().includes(q) ||
+      (t.assignedTo && t.assignedTo.toLowerCase().includes(q));
+    return matchesPriority && matchesSearch;
+  });
+
   return (
     <div className="max-w-6xl mx-auto space-y-6 pb-12">
       {/* Top Banner: Account Identity & Competency Statement */}
@@ -226,18 +265,44 @@ export const TechnicianInboxView: React.FC<TechnicianInboxViewProps> = ({
           <div className="flex items-center gap-2 text-xs text-blue-200">
             <ShieldCheck className="h-4 w-4 text-emerald-400 shrink-0" />
             <span>
-              Sessione autenticata per <strong className="text-white">{currentUser.displayName}</strong> ({currentUser.role}). Visibilità rigorosamente segregata.
+              Sessione autenticata per <strong className="text-white">{currentUser.displayName}</strong> ({currentUser.role}).
             </span>
           </div>
 
-          <button
-            onClick={onLogout}
-            id="btn-inbox-logout"
-            className="flex items-center gap-1.5 rounded-xl border border-red-500/40 bg-red-950/20 hover:bg-red-900/40 hover:border-red-500/60 px-3 py-1.5 text-xs text-red-300 font-semibold transition"
-          >
-            <LogOut className="h-3.5 w-3.5" />
-            <span>Disconnetti (Logout)</span>
-          </button>
+          <div className="flex items-center gap-2">
+            {/* Password Change Button for current admin */}
+            <button
+              onClick={onOpenChangePasswordModal}
+              id="btn-inbox-change-pwd"
+              className="flex items-center gap-1.5 rounded-xl border border-[#1A3166] bg-[#0E1F4B] hover:bg-[#1E3975] hover:border-[#D4AF37]/50 px-3 py-1.5 text-xs text-blue-100 font-semibold transition"
+              title="Cambia la tua password di accesso"
+            >
+              <KeyRound className="h-3.5 w-3.5 text-[#F3C64F]" />
+              <span>Modifica Password</span>
+            </button>
+
+            {/* Coordinator Register Admin Button - Only if user has coordination permission */}
+            {(currentUser.permissions?.coordination || currentUser.id === 'piccirilli') && (
+              <button
+                onClick={onOpenAdminRegisterModal}
+                id="btn-inbox-new-admin"
+                className="flex items-center gap-1.5 rounded-xl border border-[#D4AF37]/70 bg-gradient-to-r from-[#D4AF37]/20 via-[#F3C64F]/25 to-[#D4AF37]/20 hover:brightness-125 px-3 py-1.5 text-xs text-[#F3C64F] font-bold transition shadow-sm ring-1 ring-[#D4AF37]/40"
+                title="Finestra riservata ai Coordinatori per registrare nuovi account Amministratori"
+              >
+                <Crown className="h-3.5 w-3.5 text-[#D4AF37]" />
+                <span>Registra Nuovo Admin</span>
+              </button>
+            )}
+
+            <button
+              onClick={onLogout}
+              id="btn-inbox-logout"
+              className="flex items-center gap-1.5 rounded-xl border border-red-500/40 bg-red-950/20 hover:bg-red-900/40 hover:border-red-500/60 px-3 py-1.5 text-xs text-red-300 font-semibold transition"
+            >
+              <LogOut className="h-3.5 w-3.5" />
+              <span>Disconnetti</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -278,6 +343,42 @@ export const TechnicianInboxView: React.FC<TechnicianInboxViewProps> = ({
           <span className="text-[11px] font-mono text-[#F3C64F] bg-[#070F24] px-2.5 py-1 rounded border border-[#D4AF37]/40">
             Sincronizzato
           </span>
+        </div>
+      )}
+
+      {/* Coordinator Dedicated Admin Registration Panel (Only for Piccirilli and coordinators) */}
+      {(currentUser.permissions?.coordination || currentUser.id === 'piccirilli') && (
+        <div 
+          id="coordinator-admin-registration-banner"
+          className="rounded-2xl border border-[#D4AF37]/60 bg-gradient-to-r from-[#070F24] via-[#0E1F4B] to-[#070F24] p-4 sm:p-5 shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4 ring-1 ring-[#D4AF37]/30"
+        >
+          <div className="flex items-start sm:items-center gap-3.5">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#D4AF37] via-[#F3C64F] to-[#D4AF37] text-[#070F26] font-black shadow-lg shadow-black/50">
+              <Crown className="h-6 w-6" />
+            </div>
+            <div>
+              <div className="flex flex-wrap items-center gap-2">
+                <h3 className="text-sm sm:text-base font-bold text-white">
+                  Finestra Registrazione Nuovo Utente Admin
+                </h3>
+                <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-[#D4AF37]/20 text-[#F3C64F] border border-[#D4AF37]/40">
+                  Riservato Coordinatori
+                </span>
+              </div>
+              <p className="text-xs text-blue-200/90 mt-1 max-w-2xl">
+                Funzione attiva per <strong>{currentUser.displayName}</strong>. Puoi registrare nuovi amministratori configurando le checkbox di livello (T1 Triage, T2 Specialista, T3 Fornitore) e l'abilitazione al Coordinamento.
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={onOpenAdminRegisterModal}
+            id="btn-open-admin-register-modal-banner"
+            className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#D4AF37] via-[#F3C64F] to-[#D4AF37] hover:brightness-110 text-[#070F26] text-xs font-bold shadow-lg shadow-[#D4AF37]/20 transition active:scale-95"
+          >
+            <UserPlus className="h-4 w-4" />
+            <span>Apri Registrazione Admin</span>
+          </button>
         </div>
       )}
 
@@ -329,6 +430,214 @@ export const TechnicianInboxView: React.FC<TechnicianInboxViewProps> = ({
         </span>
       </div>
 
+      {/* Priority Filter & Search Bar */}
+      <div className="rounded-2xl border border-[#1A3166] bg-[#0A1636] p-4 shadow-lg space-y-3">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+          {/* Priority filter buttons / pills */}
+          <div className="flex flex-wrap items-center gap-1.5">
+            <div className="flex items-center gap-1.5 text-xs text-blue-300/80 mr-1 font-semibold">
+              <Filter className="h-3.5 w-3.5 text-[#D4AF37]" />
+              <span>Priorità:</span>
+            </div>
+
+            {/* Select for mobile */}
+            <select
+              value={filterPriority}
+              onChange={(e) => setFilterPriority(e.target.value)}
+              aria-label="Filtra per priorità"
+              className="sm:hidden rounded-lg border border-[#1A3166] bg-[#070F24] px-2.5 py-1.5 text-xs text-blue-200 focus:border-[#D4AF37] focus:outline-none"
+            >
+              <option value="Tutte">Tutte ({countTutte})</option>
+              <option value="P1">P1 - Critico ({countP1})</option>
+              <option value="P2">P2 - Alto ({countP2})</option>
+              <option value="P3">P3 - Medio ({countP3})</option>
+              <option value="P4">P4 - Basso ({countP4})</option>
+            </select>
+
+            {/* Desktop / tablet button chips */}
+            <div className="hidden sm:flex flex-wrap items-center gap-1.5">
+              <button
+                type="button"
+                onClick={() => setFilterPriority('Tutte')}
+                className={`rounded-xl px-3 py-1.5 text-xs font-semibold transition border flex items-center gap-1.5 ${
+                  filterPriority === 'Tutte'
+                    ? 'bg-gradient-to-r from-[#D4AF37] via-[#F3C64F] to-[#D4AF37] text-[#070F26] font-bold border-[#F5D880] shadow-sm'
+                    : 'bg-[#070F24] border-[#1A3166] text-blue-200 hover:border-[#D4AF37]/40 hover:text-white'
+                }`}
+              >
+                <span>Tutte</span>
+                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold ${
+                  filterPriority === 'Tutte' ? 'bg-[#070F26]/30 text-[#070F26]' : 'bg-[#0E1F4B] text-blue-300'
+                }`}>
+                  {countTutte}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setFilterPriority(filterPriority === 'P1' ? 'Tutte' : 'P1')}
+                className={`rounded-xl px-3 py-1.5 text-xs font-semibold transition border flex items-center gap-1.5 ${
+                  filterPriority === 'P1'
+                    ? 'bg-red-600 text-white font-bold border-red-400 shadow-md shadow-red-950/50 ring-2 ring-red-500/40'
+                    : countP1 > 0
+                    ? 'bg-red-950/40 border-red-500/40 text-red-300 hover:bg-red-900/40'
+                    : 'bg-[#070F24] border-[#1A3166] text-red-400/50 hover:border-red-500/30'
+                }`}
+              >
+                <span className="h-2 w-2 rounded-full bg-red-400 animate-pulse"></span>
+                <span>P1 - Critico</span>
+                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold ${
+                  filterPriority === 'P1' ? 'bg-black/40 text-white' : 'bg-red-950 text-red-300 border border-red-500/30'
+                }`}>
+                  {countP1}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setFilterPriority(filterPriority === 'P2' ? 'Tutte' : 'P2')}
+                className={`rounded-xl px-3 py-1.5 text-xs font-semibold transition border flex items-center gap-1.5 ${
+                  filterPriority === 'P2'
+                    ? 'bg-[#D4AF37] text-[#070F26] font-bold border-[#F5D880] shadow-md shadow-[#D4AF37]/30 ring-2 ring-[#D4AF37]/40'
+                    : countP2 > 0
+                    ? 'bg-[#D4AF37]/15 border-[#D4AF37]/40 text-[#F3C64F] hover:bg-[#D4AF37]/25'
+                    : 'bg-[#070F24] border-[#1A3166] text-amber-400/50 hover:border-[#D4AF37]/30'
+                }`}
+              >
+                <span className="h-2 w-2 rounded-full bg-[#F3C64F]"></span>
+                <span>P2 - Alto</span>
+                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold ${
+                  filterPriority === 'P2' ? 'bg-[#070F26]/30 text-[#070F26]' : 'bg-[#0E1F4B] text-[#F3C64F] border border-[#D4AF37]/30'
+                }`}>
+                  {countP2}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setFilterPriority(filterPriority === 'P3' ? 'Tutte' : 'P3')}
+                className={`rounded-xl px-3 py-1.5 text-xs font-semibold transition border flex items-center gap-1.5 ${
+                  filterPriority === 'P3'
+                    ? 'bg-blue-600 text-white font-bold border-blue-400 shadow-md shadow-blue-950/50 ring-2 ring-blue-500/40'
+                    : countP3 > 0
+                    ? 'bg-blue-950/40 border-blue-500/40 text-blue-300 hover:bg-blue-900/40'
+                    : 'bg-[#070F24] border-[#1A3166] text-blue-400/50 hover:border-blue-500/30'
+                }`}
+              >
+                <span className="h-2 w-2 rounded-full bg-blue-400"></span>
+                <span>P3 - Medio</span>
+                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold ${
+                  filterPriority === 'P3' ? 'bg-black/40 text-white' : 'bg-blue-950 text-blue-300 border border-blue-500/30'
+                }`}>
+                  {countP3}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setFilterPriority(filterPriority === 'P4' ? 'Tutte' : 'P4')}
+                className={`rounded-xl px-3 py-1.5 text-xs font-semibold transition border flex items-center gap-1.5 ${
+                  filterPriority === 'P4'
+                    ? 'bg-slate-400 text-[#070F26] font-bold border-slate-300 shadow-md ring-2 ring-slate-400/40'
+                    : countP4 > 0
+                    ? 'bg-slate-900/60 border-slate-600/40 text-slate-300 hover:bg-slate-800/60'
+                    : 'bg-[#070F24] border-[#1A3166] text-slate-400/50 hover:border-slate-500/30'
+                }`}
+              >
+                <span className="h-2 w-2 rounded-full bg-slate-400"></span>
+                <span>P4 - Basso</span>
+                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold ${
+                  filterPriority === 'P4' ? 'bg-black/40 text-white' : 'bg-slate-900 text-slate-300 border border-slate-600/30'
+                }`}>
+                  {countP4}
+                </span>
+              </button>
+            </div>
+          </div>
+
+          {/* Quick search input & Active filter reset */}
+          <div className="flex items-center gap-2">
+            <div className="relative flex-1 sm:w-64">
+              <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-blue-400/50" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Cerca ticket, asset, problema..."
+                className="w-full rounded-xl border border-[#1A3166] bg-[#070F24] pl-9 pr-7 py-1.5 text-xs text-blue-100 placeholder-blue-400/40 focus:border-[#D4AF37] focus:outline-none"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-2.5 top-2 text-blue-400/60 hover:text-white"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              )}
+            </div>
+
+            {(filterPriority !== 'Tutte' || searchQuery) && (
+              <button
+                type="button"
+                onClick={() => {
+                  setFilterPriority('Tutte');
+                  setSearchQuery('');
+                }}
+                className="flex items-center gap-1 rounded-xl border border-[#1A3166] bg-[#070F24] px-2.5 py-1.5 text-xs text-blue-300 hover:text-[#F3C64F] hover:border-[#D4AF37]/40 transition shrink-0"
+                title="Rimuovi tutti i filtri"
+              >
+                <X className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">Azzera</span>
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Feedback on applied priority filter */}
+        <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-blue-300/70 pt-2 border-t border-[#1A3166]/60">
+          <div className="flex flex-wrap items-center gap-2">
+            <span>Mostrati: <strong className="text-white font-mono">{displayedTickets.length}</strong> su <strong className="text-blue-200 font-mono">{currentTabTickets.length}</strong> ticket</span>
+            {filterPriority !== 'Tutte' && (
+              <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md font-semibold border ${
+                filterPriority === 'P1'
+                  ? 'bg-red-950/60 text-red-300 border-red-500/40'
+                  : filterPriority === 'P2'
+                  ? 'bg-[#D4AF37]/15 text-[#F3C64F] border-[#D4AF37]/40'
+                  : filterPriority === 'P3'
+                  ? 'bg-blue-950/60 text-blue-300 border-blue-500/40'
+                  : 'bg-slate-900/60 text-slate-300 border-slate-600/40'
+              }`}>
+                Filtro Priorità attivo: <strong className="font-mono">{filterPriority}</strong>
+                <button
+                  type="button"
+                  onClick={() => setFilterPriority('Tutte')}
+                  className="hover:text-white ml-0.5"
+                  title="Rimuovi filtro priorità"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </span>
+            )}
+            {searchQuery && (
+              <span className="inline-flex items-center gap-1 bg-[#0E1F4B] text-blue-200 border border-blue-500/30 px-2 py-0.5 rounded-md">
+                Testo: "{searchQuery}"
+              </span>
+            )}
+          </div>
+
+          {filterPriority !== 'Tutte' && (
+            <button
+              type="button"
+              onClick={() => setFilterPriority('Tutte')}
+              className="text-[#F3C64F] hover:underline font-medium text-xs"
+            >
+              Mostra tutte le priorità
+            </button>
+          )}
+        </div>
+      </div>
+
       {/* Ticket List for the Active Tab */}
       <div className="space-y-4">
         {activeTab === 'pending' && pendingTickets.length === 0 && (
@@ -355,8 +664,36 @@ export const TechnicianInboxView: React.FC<TechnicianInboxViewProps> = ({
           </div>
         )}
 
+        {/* Empty filter results when tickets exist in tab but none match priority / query */}
+        {currentTabTickets.length > 0 && displayedTickets.length === 0 && (
+          <div className="rounded-2xl border border-dashed border-[#1A3166] p-10 text-center text-blue-300/60 space-y-3">
+            <AlertCircle className="h-8 w-8 mx-auto text-[#D4AF37]" />
+            <h3 className="text-sm font-semibold text-blue-100">
+              {filterPriority !== 'Tutte'
+                ? `Nessun ticket con priorità "${filterPriority}" trovato in questa sezione`
+                : 'Nessun ticket corrisponde ai filtri di ricerca'}
+            </h3>
+            <p className="text-xs max-w-sm mx-auto">
+              {filterPriority !== 'Tutte'
+                ? `Ci sono altri ${currentTabTickets.length} ticket in questa sezione con diversi livelli di priorità.`
+                : 'Prova a modificare o azzerare i parametri inseriti.'}
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                setFilterPriority('Tutte');
+                setSearchQuery('');
+              }}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-[#D4AF37]/50 bg-[#0E1F4B] px-4 py-2 text-xs font-semibold text-[#F3C64F] hover:bg-[#D4AF37]/20 transition"
+            >
+              <X className="h-3.5 w-3.5" />
+              <span>Reimposta Filtro Priorità</span>
+            </button>
+          </div>
+        )}
+
         {/* Render Cards */}
-        {((activeTab === 'pending' ? pendingTickets : activeTab === 'resolved' ? resolvedTickets : t3Tickets)).map((ticket) => {
+        {displayedTickets.map((ticket) => {
           const isNewlyArrived = ticket.ticketId === lastArrivedTicketId;
           const isTransferredToMe = ticket.lastTransfer?.toTechnicianId === currentUser.id;
 

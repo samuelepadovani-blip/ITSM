@@ -44,17 +44,30 @@ export const UserReportPortal: React.FC<UserReportPortalProps> = ({
   const [reporterName, setReporterName] = useState(currentUser?.displayName || 'Marco (Staff Centro)');
   const [reporterZone, setReporterZone] = useState('Sala Slot Nord - Postazione 14');
   const [userMessage, setUserMessage] = useState('');
+  const [selectedPriority, setSelectedPriority] = useState<PriorityLevel | 'Auto'>('Auto');
   const [urgencyOverride, setUrgencyOverride] = useState<'Normale' | 'Urgente' | 'Critico'>('Normale');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [createdTicket, setCreatedTicket] = useState<ITSMTicket | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // Tickets created by or pertinent to this user
-  const userTickets = allTickets.filter(
-    (t) => t.reporterName?.toLowerCase().includes(reporterName.toLowerCase().split(' ')[0]) ||
-           t.reporterName?.toLowerCase().includes('marco') ||
-           t.reporterName?.toLowerCase().includes('utente')
-  );
+  const userTickets = allTickets.filter((t) => {
+    if (currentUser?.type === 'reporter') {
+      const matchName = currentUser.displayName.toLowerCase().split(' ')[0];
+      const matchCurrent = reporterName.toLowerCase().split(' ')[0];
+      return (
+        (t.reporterName && t.reporterName.toLowerCase().includes(matchName)) ||
+        (t.reporterName && t.reporterName.toLowerCase().includes(matchCurrent)) ||
+        (t.reporterName && (
+          t.reporterName.toLowerCase().includes('utente') ||
+          t.reporterName.toLowerCase().includes('staff') ||
+          t.reporterName.toLowerCase().includes('marco') ||
+          t.reporterName.toLowerCase().includes('sala')
+        ))
+      );
+    }
+    return true;
+  });
 
   const PRESET_SCENARIOS = [
     {
@@ -134,6 +147,7 @@ export const UserReportPortal: React.FC<UserReportPortalProps> = ({
             userMessage: userMessage.trim(),
             reporterName: reporterName.trim() || 'Operatore Centro',
             reporterZone: reporterZone.trim() || 'Generale',
+            priorityOverride: selectedPriority === 'Auto' ? undefined : selectedPriority,
             urgencyOverride,
           }),
         });
@@ -154,7 +168,13 @@ export const UserReportPortal: React.FC<UserReportPortalProps> = ({
         const now = new Date();
         const timeStr = now.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
 
-        if (urgencyOverride) {
+        if (selectedPriority !== 'Auto') {
+          local.priority = selectedPriority;
+          if (selectedPriority === 'P1') local.sla = 'P1 Critico - Presa in carico < 15 min / Risoluzione < 2h';
+          else if (selectedPriority === 'P2') local.sla = 'P2 Alto - Presa in carico < 30 min / Risoluzione < 4h';
+          else if (selectedPriority === 'P3') local.sla = 'P3 Medio - Presa in carico < 2h / Risoluzione < 8h';
+          else if (selectedPriority === 'P4') local.sla = 'P4 Basso - Presa in carico < 4h / Risoluzione < 24h';
+        } else if (urgencyOverride) {
           if (urgencyOverride === 'Critico') {
             local.priority = 'P1';
             local.sla = 'P1 Critico - Presa in carico < 15 min / Risoluzione < 2h';
@@ -293,26 +313,33 @@ export const UserReportPortal: React.FC<UserReportPortalProps> = ({
               Invia un'altra segnalazione
             </button>
 
-            <div className="flex flex-wrap items-center gap-2">
-              {onAskAI && (
-                <button
-                  onClick={() => onAskAI(createdTicket)}
-                  className="flex items-center gap-1.5 rounded-xl border border-[#D4AF37]/40 bg-[#D4AF37]/10 px-4 py-2 text-xs font-bold text-[#F3C64F] hover:bg-[#D4AF37]/20 hover:border-[#D4AF37]/60 transition shadow-sm"
-                  title="Inoltra la richiesta all'Assistente AI per approfondimenti e istruzioni immediate"
-                >
-                  <Sparkles className="h-3.5 w-3.5 text-[#D4AF37]" />
-                  <span>Chiedi all'Assistente AI</span>
-                </button>
-              )}
+            {currentUser?.type === 'reporter' ? (
+              <div className="flex items-center gap-2 text-xs font-semibold text-emerald-300 bg-emerald-950/40 border border-emerald-500/30 px-3.5 py-2 rounded-xl">
+                <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
+                <span>Segnalazione presa in carico ed inoltrata all'Admin competente ({createdTicket.assignedTo}).</span>
+              </div>
+            ) : (
+              <div className="flex flex-wrap items-center gap-2">
+                {onAskAI && (
+                  <button
+                    onClick={() => onAskAI(createdTicket)}
+                    className="flex items-center gap-1.5 rounded-xl border border-[#D4AF37]/40 bg-[#D4AF37]/10 px-4 py-2 text-xs font-bold text-[#F3C64F] hover:bg-[#D4AF37]/20 hover:border-[#D4AF37]/60 transition shadow-sm"
+                    title="Inoltra la richiesta all'Assistente AI per approfondimenti e istruzioni immediate"
+                  >
+                    <Sparkles className="h-3.5 w-3.5 text-[#D4AF37]" />
+                    <span>Chiedi all'Assistente AI</span>
+                  </button>
+                )}
 
-              <button
-                onClick={() => onNavigateToInbox(createdTicket.assignedTechnicianId)}
-                className="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-[#D4AF37] via-[#F3C64F] to-[#D4AF37] hover:brightness-110 px-4 py-2 text-xs font-bold text-[#070F26] shadow-md shadow-[#D4AF37]/20 transition"
-              >
-                <span>Vedi Arrivo nella Postazione di {createdTicket.assignedTo}</span>
-                <ArrowRight className="h-3.5 w-3.5" />
-              </button>
-            </div>
+                <button
+                  onClick={() => onNavigateToInbox(createdTicket.assignedTechnicianId)}
+                  className="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-[#D4AF37] via-[#F3C64F] to-[#D4AF37] hover:brightness-110 px-4 py-2 text-xs font-bold text-[#070F26] shadow-md shadow-[#D4AF37]/20 transition"
+                >
+                  <span>Vedi Arrivo nella Postazione di {createdTicket.assignedTo}</span>
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -327,7 +354,7 @@ export const UserReportPortal: React.FC<UserReportPortalProps> = ({
                 <span>Scenari di Prova Rapida:</span>
               </span>
               <span className="text-[11px] text-blue-300/60 hidden sm:inline">
-                Clicca per autocompilare e testare l'instradamento ai diversi tecnici
+                Clicca per autocompilare e testare l'instradamento ai diversi admin
               </span>
             </div>
 
@@ -413,30 +440,55 @@ export const UserReportPortal: React.FC<UserReportPortalProps> = ({
               />
             </div>
 
-            {/* Urgency Level selection */}
-            <div className="space-y-1.5">
-              <label className="block text-xs font-semibold text-blue-200">
-                Gravità percepita dall'utente:
-              </label>
-              <div className="grid grid-cols-3 gap-2">
-                {(['Normale', 'Urgente', 'Critico'] as const).map((lvl) => (
+            {/* Priority Selection P1-P4 strictly requested by user */}
+            <div className="space-y-2">
+              <div className="flex flex-wrap items-center justify-between gap-1">
+                <label className="text-xs font-bold text-blue-200 flex items-center gap-1.5">
+                  <Flame className="h-3.5 w-3.5 text-[#D4AF37]" />
+                  <span>Priorità della Segnalazione (Scelta dall'Utente) *:</span>
+                </label>
+                <span className="text-[11px] font-medium text-blue-300/80">
+                  {selectedPriority === 'P1' && '🔴 SLA Presa in carico < 15 min / Risoluzione < 2h'}
+                  {selectedPriority === 'P2' && '🟡 SLA Presa in carico < 30 min / Risoluzione < 4h'}
+                  {selectedPriority === 'P3' && '🔵 SLA Presa in carico < 2h / Risoluzione < 8h'}
+                  {selectedPriority === 'P4' && '⚪ SLA Presa in carico < 4h / Risoluzione < 24-48h'}
+                  {selectedPriority === 'Auto' && '✨ Classificazione automatica da parte dell\'ITSM'}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+                {[
+                  { id: 'P1' as const, label: 'P1 - Critico', sub: 'Fermo sala / Emergenza', color: 'bg-red-500/20 border-red-500 text-red-300' },
+                  { id: 'P2' as const, label: 'P2 - Alto', sub: 'Forte impatto operativo', color: 'bg-amber-500/20 border-amber-500 text-amber-300' },
+                  { id: 'P3' as const, label: 'P3 - Medio', sub: 'Anomalia ordinaria', color: 'bg-blue-500/20 border-blue-500 text-blue-200' },
+                  { id: 'P4' as const, label: 'P4 - Basso', sub: 'Richiesta minore / Estetica', color: 'bg-slate-700/40 border-slate-500 text-slate-300' },
+                  { id: 'Auto' as const, label: 'Auto (AI)', sub: 'Rilevamento Intelligente', color: 'bg-[#D4AF37]/20 border-[#D4AF37] text-[#F3C64F]' },
+                ].map((item) => (
                   <button
-                    key={lvl}
+                    key={item.id}
                     type="button"
-                    onClick={() => setUrgencyOverride(lvl)}
-                    className={`rounded-xl py-2 px-3 text-xs font-semibold transition border text-center ${
-                      urgencyOverride === lvl
-                        ? lvl === 'Critico'
-                          ? 'bg-red-500/20 border-red-500 text-red-300 font-bold'
-                          : lvl === 'Urgente'
-                          ? 'bg-[#D4AF37]/20 border-[#D4AF37] text-[#F3C64F] font-bold'
-                          : 'bg-[#0E1F4B] border-blue-400 text-blue-100 font-bold'
+                    onClick={() => setSelectedPriority(item.id)}
+                    className={`rounded-xl p-2.5 text-left border transition text-xs ${
+                      selectedPriority === item.id
+                        ? `${item.color} ring-1 font-bold shadow-sm`
                         : 'bg-[#070F24] border-[#1A3166] text-blue-200/60 hover:bg-[#0C1A3D]'
                     }`}
                   >
-                    {lvl === 'Critico' ? '🔴 Critico (Fermo Sala)' : lvl === 'Urgente' ? '🟡 Urgente' : '🟢 Normale'}
+                    <div className="font-bold">{item.label}</div>
+                    <div className="text-[10px] opacity-80 truncate">{item.sub}</div>
                   </button>
                 ))}
+              </div>
+
+              {/* Destination Admin Routing Guide */}
+              <div className="p-3 rounded-xl bg-[#070F24]/80 border border-[#1A3166] text-[11px] text-blue-300/80 space-y-1">
+                <span className="font-bold text-[#F3C64F] block">Instradamento Automatico dell'ITSM ai 4 Admin:</span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 text-[10.5px]">
+                  <div>• Slot, Casse, Cambiacash, Bowling ➔ <strong>Admin Lorenzo Benin</strong></div>
+                  <div>• Rete, POS, Videocamere, IT ➔ <strong>Admin Piccirilli</strong></div>
+                  <div>• Clima UTA, Luci, Audio, Allarmi ➔ <strong>Admin Padovani</strong></div>
+                  <div>• Macchine Caffè, Frigo, Spine ➔ <strong>Admin Ayoub</strong></div>
+                </div>
               </div>
             </div>
 
@@ -462,7 +514,7 @@ export const UserReportPortal: React.FC<UserReportPortalProps> = ({
               ) : (
                 <>
                   <Send className="h-4 w-4 text-[#070F26] stroke-[2.5]" />
-                  <span>Invia Segnalazione e Notifica Tecnico Competente</span>
+                  <span>Invia Segnalazione e Notifica Admin Competente</span>
                 </>
               )}
             </button>
@@ -488,9 +540,20 @@ export const UserReportPortal: React.FC<UserReportPortalProps> = ({
                 className="rounded-xl border border-[#15254A] bg-[#070F24]/80 p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
               >
                 <div className="space-y-1">
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     <span className="font-mono font-bold text-white">#{t.ticketId}</span>
                     <span className="font-semibold text-[#F3C64F]">{t.asset}</span>
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${
+                      t.priority === 'P1'
+                        ? 'bg-red-950/60 text-red-300 border-red-500/40'
+                        : t.priority === 'P2'
+                        ? 'bg-[#D4AF37]/20 text-[#F3C64F] border-[#D4AF37]/50'
+                        : t.priority === 'P3'
+                        ? 'bg-blue-950/60 text-blue-300 border-blue-500/40'
+                        : 'bg-slate-900/60 text-slate-300 border-slate-600/40'
+                    }`}>
+                      {t.priority}
+                    </span>
                     <span className={`px-2 py-0.5 rounded text-[10px] font-semibold border ${
                       t.status === 'Risolto'
                         ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
@@ -513,7 +576,7 @@ export const UserReportPortal: React.FC<UserReportPortalProps> = ({
                 <div className="flex items-center gap-3 shrink-0 text-blue-300/70 text-[11px]">
                   <span>Preso in carico da: <strong className="text-white">{t.assignedTo}</strong></span>
                   <span className="font-mono text-blue-400/60">{t.timestamp}</span>
-                  {onAskAI && (
+                  {onAskAI && currentUser?.type !== 'reporter' && (
                     <button
                       onClick={() => onAskAI(t)}
                       className="flex items-center gap-1 rounded-lg border border-[#D4AF37]/40 bg-[#D4AF37]/10 px-2.5 py-1 text-[11px] font-semibold text-[#F3C64F] hover:bg-[#D4AF37]/20 transition"

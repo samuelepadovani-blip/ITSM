@@ -10,6 +10,8 @@ import { ITSMDesignerView } from './components/ITSMDesignerView';
 import { TicketBoardView } from './components/TicketBoardView';
 import { OnlineLiveModal } from './components/OnlineLiveModal';
 import { TransferTicketModal } from './components/TransferTicketModal';
+import { AdminRegisterModal } from './components/AdminRegisterModal';
+import { ChangePasswordModal } from './components/ChangePasswordModal';
 import { AuthScreen } from './components/AuthScreen';
 import { playNotificationChime } from './utils/audio';
 import { 
@@ -39,6 +41,8 @@ export default function App() {
   // Modals state
   const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
   const [ticketToTransfer, setTicketToTransfer] = useState<ITSMTicket | null>(null);
+  const [isAdminRegisterModalOpen, setIsAdminRegisterModalOpen] = useState(false);
+  const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] = useState(false);
 
   // AI Chat navigation state
   const [aiChatInitialPrompt, setAiChatInitialPrompt] = useState<string | null>(null);
@@ -124,6 +128,22 @@ export default function App() {
     // Initial load
     fetchServerTickets();
 
+    // Fetch synced accounts
+    const fetchAccounts = async () => {
+      try {
+        const res = await fetch('/api/accounts');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.accounts && Array.isArray(data.accounts)) {
+            setAccounts(data.accounts);
+          }
+        }
+      } catch (e) {
+        console.debug('Accounts fetch note:', e);
+      }
+    };
+    fetchAccounts();
+
     // Poll every 3 seconds for multi-user live synchronization
     const interval = setInterval(fetchServerTickets, 3000);
 
@@ -154,6 +174,19 @@ export default function App() {
 
   const handleRegisterAccount = (newAccount: UserAccount) => {
     setAccounts((prev) => [newAccount, ...prev]);
+  };
+
+  const handleAdminCreated = (newAdmin: UserAccount) => {
+    setAccounts((prev) => [newAdmin, ...prev]);
+    setToastMessage(`🛡️ Nuovo Amministratore "${newAdmin.displayName}" registrato con successo!`);
+    setTimeout(() => setToastMessage(null), 5000);
+  };
+
+  const handlePasswordChanged = (updatedUser: UserAccount) => {
+    setCurrentUser(updatedUser);
+    setAccounts((prev) => prev.map((a) => (a.id === updatedUser.id ? updatedUser : a)));
+    setToastMessage(`🔑 Password aggiornata con successo per ${updatedUser.displayName}!`);
+    setTimeout(() => setToastMessage(null), 4000);
   };
 
   const handleNewTicketCreated = (newTicket: ITSMTicket) => {
@@ -389,6 +422,8 @@ Prendi in carico il problema e forniscimi subito la serie completa di passaggi o
         currentUser={currentUser}
         onLogout={handleLogout}
         unreadTransferCount={unreadTransferCount}
+        onOpenAdminRegisterModal={() => setIsAdminRegisterModalOpen(true)}
+        onOpenChangePasswordModal={() => setIsChangePasswordModalOpen(true)}
       />
 
       {/* Ticket Transfer Modal */}
@@ -401,6 +436,23 @@ Prendi in carico il problema e forniscimi subito la serie completa di passaggi o
         ticket={ticketToTransfer}
         currentUser={currentUser}
         onTransferConfirmed={handleConfirmTransfer}
+      />
+
+      {/* Admin Registration Modal (Only for coordinators like Piccirilli) */}
+      <AdminRegisterModal
+        isOpen={isAdminRegisterModalOpen}
+        onClose={() => setIsAdminRegisterModalOpen(false)}
+        currentUser={currentUser}
+        coordinatorUser={currentUser}
+        onAdminCreated={handleAdminCreated}
+      />
+
+      {/* Personal Password Change Modal */}
+      <ChangePasswordModal
+        isOpen={isChangePasswordModalOpen}
+        onClose={() => setIsChangePasswordModalOpen(false)}
+        currentUser={currentUser}
+        onPasswordChanged={handlePasswordChanged}
       />
 
       {/* Online & Sharing Modal */}
@@ -422,15 +474,13 @@ Prendi in carico il problema e forniscimi subito la serie completa di passaggi o
 
       {/* Main Content Area */}
       <main className="flex-1 p-3 sm:p-6 lg:p-8">
-        {/* 1. Portal for Users to Report Problems */}
-        {currentView === 'portal' && (
+        {/* 1. Portal for Users to Report Problems - The ONLY view for standard users */}
+        {(currentView === 'portal' || currentUser.type === 'reporter') && (
           <UserReportPortal
             onTicketCreated={handleNewTicketCreated}
             onNavigateToInbox={(techId) => {
               if (currentUser.type === 'technician') {
                 setCurrentView('inbox');
-              } else {
-                handleLogout();
               }
             }}
             currentUser={currentUser}
@@ -441,7 +491,7 @@ Prendi in carico il problema e forniscimi subito la serie completa di passaggi o
         )}
 
         {/* 2. Technicians' Inbox View (Isolated strictly by currentUser role) */}
-        {currentView === 'inbox' && (
+        {currentUser.type === 'technician' && currentView === 'inbox' && (
           <TechnicianInboxView
             tickets={tickets}
             currentUser={currentUser}
@@ -457,11 +507,13 @@ Prendi in carico il problema e forniscimi subito la serie completa di passaggi o
             soundEnabled={soundEnabled}
             onToggleSound={() => setSoundEnabled(!soundEnabled)}
             lastArrivedTicketId={lastArrivedTicketId}
+            onOpenAdminRegisterModal={() => setIsAdminRegisterModalOpen(true)}
+            onOpenChangePasswordModal={() => setIsChangePasswordModalOpen(true)}
           />
         )}
 
-        {/* 3. AI Helpdesk Chat */}
-        {currentView === 'chat' && (
+        {/* 3. AI Helpdesk Chat (Admins only) */}
+        {currentUser.type === 'technician' && currentView === 'chat' && (
           <HelpdeskChat
             onNewTicketCreated={handleNewTicketCreated}
             onStatusChange={handleStatusChange}
@@ -473,7 +525,7 @@ Prendi in carico il problema e forniscimi subito la serie completa di passaggi o
         )}
 
         {/* 4. Complete Ticket Register (Piccirilli / Coordinamento) */}
-        {currentView === 'board' && (
+        {currentUser.type === 'technician' && currentView === 'board' && (
           <TicketBoardView
             tickets={tickets}
             onStatusChange={handleStatusChange}
@@ -481,8 +533,8 @@ Prendi in carico il problema e forniscimi subito la serie completa di passaggi o
           />
         )}
 
-        {/* 5. ITSM Manual & Architecture Reference */}
-        {currentView === 'design' && <ITSMDesignerView />}
+        {/* 5. ITSM Manual & Architecture Reference (Admins only) */}
+        {currentUser.type === 'technician' && currentView === 'design' && <ITSMDesignerView />}
       </main>
 
       {/* Operational Footer Bar */}

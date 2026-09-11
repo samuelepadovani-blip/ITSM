@@ -486,9 +486,320 @@ const INITIAL_SERVER_TICKETS: StoredTicket[] = [
 
 let ticketsStore: StoredTicket[] = [...INITIAL_SERVER_TICKETS];
 
+// Persistent accounts store on server
+interface ServerAccount {
+  id: string;
+  username: string;
+  displayName: string;
+  role: string;
+  type: 'reporter' | 'technician';
+  isAdmin?: boolean;
+  level: string;
+  technicianId?: string;
+  category: string;
+  competencyDescription: string;
+  canCallVendors: boolean;
+  avatarColor: string;
+  email: string;
+  password?: string;
+  permissions?: {
+    t1: boolean;
+    t2: boolean;
+    t3Vendor: boolean;
+    coordination: boolean;
+  };
+}
+
+let serverAccounts: ServerAccount[] = [
+  {
+    id: 'utente',
+    username: 'utente.sala',
+    displayName: 'Marco (Staff di Sala)',
+    role: 'Utente Esterno (Segnalatore Base)',
+    type: 'reporter',
+    isAdmin: false,
+    level: 'Segnalatore Base',
+    category: 'Operazioni Generali',
+    competencyDescription: 'Invio segnalazioni disservizi con priorità (P1-P4) e tracciamento dello stato dei propri ticket. Accesso limitato esclusivamente al Portale di Segnalazione.',
+    canCallVendors: false,
+    avatarColor: 'from-slate-600 to-slate-800',
+    email: 'staff.sala@centro.internal',
+    password: 'demo',
+    permissions: {
+      t1: false,
+      t2: false,
+      t3Vendor: false,
+      coordination: false,
+    },
+  },
+  {
+    id: 'benin',
+    username: 'benin',
+    displayName: 'Lorenzo Benin',
+    role: 'Admin Gaming & Cassa (Specialista Tecnico)',
+    type: 'technician',
+    isAdmin: true,
+    level: 'Admin T2 (Gaming & Cash)',
+    technicianId: 'benin',
+    category: 'Gaming & Cassa',
+    competencyDescription: 'Amministratore responsabile di Slot Machine (AWP/VLT), Macchine Cambio Cash, Gettoniere, Casse e Piste Bowling. Riceve e gestisce i ticket del proprio reparto con pieni poteri operativi.',
+    canCallVendors: false,
+    avatarColor: 'from-amber-600 to-yellow-500',
+    email: 'benin@centro.internal',
+    password: 'Password1!',
+    permissions: {
+      t1: false,
+      t2: true,
+      t3Vendor: false,
+      coordination: false,
+    },
+  },
+  {
+    id: 'piccirilli',
+    username: 'piccirilli',
+    displayName: 'Piccirilli',
+    role: 'Admin IT & Coordinatore T1 / T3 Fornitori',
+    type: 'technician',
+    isAdmin: true,
+    level: 'Admin T1 & Coordinatore / T3',
+    technicianId: 'piccirilli',
+    category: 'IT & Rete',
+    competencyDescription: 'Amministratore IT, Reti, POS, Videocamere e Triage centrale. UNICO referente autorizzato alla chiamata dei Fornitori Esterni (T3) e supervisione del Registro di Coordinamento.',
+    canCallVendors: true,
+    avatarColor: 'from-blue-600 to-indigo-600',
+    email: 'piccirilli@centro.internal',
+    password: 'Password1!',
+    permissions: {
+      t1: true,
+      t2: false,
+      t3Vendor: true,
+      coordination: true,
+    },
+  },
+  {
+    id: 'padovani',
+    username: 'padovani',
+    displayName: 'Padovani',
+    role: 'Admin Facility & Sicurezza (Specialista Tecnico)',
+    type: 'technician',
+    isAdmin: true,
+    level: 'Admin T2 (Facility & Safety)',
+    technicianId: 'padovani',
+    category: 'Facility & Sicurezza',
+    competencyDescription: 'Amministratore responsabile di Impianto Audio, Luci di sala, Climatizzazione/UTA, Allarmi e Antincendio. Riceve e gestisce i ticket del proprio reparto con pieni poteri operativi.',
+    canCallVendors: false,
+    avatarColor: 'from-emerald-500 to-teal-600',
+    email: 'padovani@centro.internal',
+    password: 'Password1!',
+    permissions: {
+      t1: false,
+      t2: true,
+      t3Vendor: false,
+      coordination: false,
+    },
+  },
+  {
+    id: 'ayoub',
+    username: 'ayoub',
+    displayName: 'Ayoub',
+    role: 'Admin Food & Beverage (Coordinatore Operativo)',
+    type: 'technician',
+    isAdmin: true,
+    level: 'Admin T2 (Food & Beverage)',
+    technicianId: 'ayoub',
+    category: 'Food & Beverage',
+    competencyDescription: 'Amministratore responsabile di Macchine del caffè, Frigoriferi bar, Tostapane, Spine birra e Distributori automatici. Riceve e gestisce i ticket del proprio reparto con pieni poteri operativi.',
+    canCallVendors: false,
+    avatarColor: 'from-rose-500 to-pink-600',
+    email: 'ayoub@centro.internal',
+    password: 'Password1!',
+    permissions: {
+      t1: false,
+      t2: true,
+      t3Vendor: false,
+      coordination: false,
+    },
+  },
+];
+
 // API Routes
 app.get('/api/health', (req: Request, res: Response) => {
   res.json({ status: 'ok', time: new Date().toISOString(), ticketCount: ticketsStore.length });
+});
+
+// REST: Get all accounts
+app.get('/api/accounts', (req: Request, res: Response) => {
+  res.json({
+    accounts: serverAccounts,
+    total: serverAccounts.length,
+  });
+});
+
+// REST: Register new normal user (reporter) ONLY
+app.post('/api/accounts/register', (req: Request, res: Response) => {
+  const {
+    id,
+    username,
+    displayName,
+    email,
+    password,
+  } = req.body;
+
+  if (!password || password.trim().length < 3) {
+    return res.status(400).json({ error: 'La password deve contenere almeno 3 caratteri.' });
+  }
+
+  const cleanEmail = email ? email.trim().toLowerCase() : '';
+  if (!cleanEmail || !cleanEmail.includes('@')) {
+    return res.status(400).json({ error: 'Inserisci un indirizzo email valido.' });
+  }
+
+  const existingIndex = serverAccounts.findIndex(a => a.email.toLowerCase() === cleanEmail);
+  if (existingIndex !== -1) {
+    const existing = serverAccounts[existingIndex];
+    existing.displayName = displayName && displayName.trim() ? displayName.trim() : existing.displayName;
+    existing.password = password.trim();
+    serverAccounts[existingIndex] = existing;
+    return res.json({
+      success: true,
+      account: existing,
+      message: `Account aggiornato con successo!`,
+    });
+  }
+
+  const generatedId = id || `user-${Date.now()}`;
+  const generatedUsername = username || cleanEmail.split('@')[0].replace(/[^a-z0-9]/g, '.');
+
+  const newAccount: ServerAccount = {
+    id: generatedId,
+    username: generatedUsername,
+    displayName: displayName && displayName.trim() ? displayName.trim() : 'Utente Esterno',
+    role: 'Utente Esterno (Segnalatore Base)',
+    type: 'reporter',
+    isAdmin: false,
+    level: 'Segnalatore Base',
+    category: 'Operazioni Generali',
+    competencyDescription: 'Invio segnalazioni disservizi con priorità (P1-P4). Accesso limitato al Portale Segnalazione.',
+    canCallVendors: false,
+    avatarColor: 'from-slate-600 to-slate-800',
+    email: cleanEmail,
+    password: password.trim(),
+    permissions: {
+      t1: false,
+      t2: false,
+      t3Vendor: false,
+      coordination: false,
+    },
+  };
+
+  serverAccounts.push(newAccount);
+  return res.status(201).json({
+    success: true,
+    account: newAccount,
+    message: `Account Utente registrato con successo!`,
+  });
+});
+
+// REST: Change Password for any account from their personal page
+app.post('/api/accounts/change-password', (req: Request, res: Response) => {
+  const { accountId, newPassword } = req.body;
+  if (!accountId || !newPassword || newPassword.trim().length < 3) {
+    return res.status(400).json({ error: 'Password non valida o id utente mancante (minimo 3 caratteri).' });
+  }
+
+  const account = serverAccounts.find(
+    a => a.id.toLowerCase() === accountId.toLowerCase() || a.username.toLowerCase() === accountId.toLowerCase()
+  );
+
+  if (!account) {
+    return res.status(404).json({ error: 'Account non trovato.' });
+  }
+
+  account.password = newPassword.trim();
+  return res.json({
+    success: true,
+    message: `Password aggiornata con successo per ${account.displayName}.`,
+    account,
+  });
+});
+
+// REST: Create a new Admin account - Restricted to Coordinators (Piccirilli and other accounts with coordination permission)
+app.post('/api/accounts/create-admin', (req: Request, res: Response) => {
+  const {
+    coordinatorId,
+    displayName,
+    username,
+    email,
+    password = 'Password1!',
+    category = 'IT & Rete',
+    permissions = { t1: false, t2: true, t3Vendor: false, coordination: false },
+  } = req.body;
+
+  // Verify that requester is a coordinator
+  const coordinator = serverAccounts.find(
+    a => a.id.toLowerCase() === (coordinatorId || '').toLowerCase() || 
+         a.username.toLowerCase() === (coordinatorId || '').toLowerCase()
+  );
+
+  if (!coordinator || (!coordinator.permissions?.coordination && coordinator.id !== 'piccirilli')) {
+    return res.status(403).json({
+      error: 'Accesso negato: solo i Coordinatori (come Piccirilli o altri con permesso di coordinamento) possono registrare nuovi amministratori.',
+    });
+  }
+
+  if (!displayName || !displayName.trim()) {
+    return res.status(400).json({ error: 'Inserisci il nome e cognome dell\'amministratore.' });
+  }
+
+  const cleanEmail = email ? email.trim().toLowerCase() : `${username.toLowerCase().trim()}@centro.internal`;
+  const cleanUsername = username ? username.trim().toLowerCase().replace(/[^a-z0-9._-]/g, '') : cleanEmail.split('@')[0];
+
+  // Check if username or email already exists
+  const duplicate = serverAccounts.find(
+    a => a.username.toLowerCase() === cleanUsername || a.email.toLowerCase() === cleanEmail
+  );
+  if (duplicate) {
+    return res.status(400).json({ error: `Esiste già un account con email ${cleanEmail} o username ${cleanUsername}.` });
+  }
+
+  const newAdminId = `admin-${cleanUsername}-${Date.now().toString().slice(-4)}`;
+  const levelDescription = permissions.coordination 
+    ? 'Admin & Coordinatore Generale'
+    : permissions.t3Vendor
+    ? 'Admin Specialista & T3 Fornitori'
+    : permissions.t2 
+    ? 'Admin T2 (Specialista di Reparto)' 
+    : 'Admin T1 (Triage & Supporto)';
+
+  const newAdmin: ServerAccount = {
+    id: newAdminId,
+    username: cleanUsername,
+    displayName: displayName.trim(),
+    role: `Admin ${category} ${permissions.coordination ? '(Coordinatore)' : ''}`,
+    type: 'technician',
+    isAdmin: true,
+    level: levelDescription,
+    technicianId: cleanUsername,
+    category: category,
+    competencyDescription: `Amministratore responsabile del reparto ${category}. ${permissions.coordination ? 'Abilitato al coordinamento e alla registrazione di altri admin.' : ''}`,
+    canCallVendors: Boolean(permissions.t3Vendor),
+    avatarColor: permissions.coordination ? 'from-amber-600 to-indigo-600' : 'from-blue-600 to-cyan-600',
+    email: cleanEmail,
+    password: password.trim() || 'Password1!',
+    permissions: {
+      t1: Boolean(permissions.t1),
+      t2: Boolean(permissions.t2),
+      t3Vendor: Boolean(permissions.t3Vendor),
+      coordination: Boolean(permissions.coordination),
+    },
+  };
+
+  serverAccounts.push(newAdmin);
+  return res.status(201).json({
+    success: true,
+    account: newAdmin,
+    message: `Nuovo Amministratore ${newAdmin.displayName} registrato con successo!`,
+  });
 });
 
 // REST: Get all stored tickets with live sync and role-based filtering
@@ -563,6 +874,10 @@ const handleCreateTicket = async (req: Request, res: Response) => {
 
     if (priorityOverride && ['P1', 'P2', 'P3', 'P4'].includes(priorityOverride)) {
       classified.priority = priorityOverride;
+      if (priorityOverride === 'P1') classified.sla = 'P1 Critico - Presa in carico < 15 min / Risoluzione < 2h';
+      else if (priorityOverride === 'P2') classified.sla = 'P2 Alto - Presa in carico < 30 min / Risoluzione < 4h';
+      else if (priorityOverride === 'P3') classified.sla = 'P3 Medio - Presa in carico < 2h / Risoluzione < 8h';
+      else if (priorityOverride === 'P4') classified.sla = 'P4 Basso - Presa in carico < 4h / Risoluzione < 24h';
     } else if (urgencyOverride) {
       if (urgencyOverride === 'Critico') {
         classified.priority = 'P1';
@@ -577,6 +892,13 @@ const handleCreateTicket = async (req: Request, res: Response) => {
     }
 
     const techId = getTechnicianId(classified.assignedTo, classified.category);
+    const techNameMap: Record<string, string> = {
+      benin: 'Lorenzo Benin (Admin Gaming & Cassa)',
+      piccirilli: 'Piccirilli (Admin IT & Coordinatore)',
+      padovani: 'Padovani (Admin Facility & Sicurezza)',
+      ayoub: 'Ayoub (Admin Food & Beverage)',
+    };
+    const assignedAdminName = techNameMap[techId] || classified.assignedTo;
 
     const now = new Date();
     const timeStr = now.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
@@ -594,7 +916,7 @@ const handleCreateTicket = async (req: Request, res: Response) => {
       category: classified.category,
       priority: classified.priority,
       sla: classified.sla,
-      assignedTo: classified.assignedTo,
+      assignedTo: assignedAdminName,
       assignedTechnicianId: techId,
       escalationT3: classified.escalationT3,
       escalationT3Note: classified.escalationT3Note,

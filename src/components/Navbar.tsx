@@ -17,7 +17,10 @@ import {
   Coffee,
   Laptop,
   LogOut,
-  User
+  User,
+  UserPlus,
+  KeyRound,
+  Crown
 } from 'lucide-react';
 import { UserAccount } from '../types';
 
@@ -32,6 +35,8 @@ interface NavbarProps {
   currentUser: UserAccount;
   onLogout: () => void;
   unreadTransferCount?: number;
+  onOpenAdminRegisterModal?: () => void;
+  onOpenChangePasswordModal?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -43,6 +48,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   currentUser,
   onLogout,
   unreadTransferCount = 0,
+  onOpenAdminRegisterModal,
+  onOpenChangePasswordModal,
 }) => {
   const getRoleIcon = (id: string) => {
     switch (id) {
@@ -143,8 +150,8 @@ export const Navbar: React.FC<NavbarProps> = ({
               </button>
             )}
 
-            {/* 3. AI Helpdesk Chat (Visible to Coordinators, T1 or Reporter) */}
-            {(hasCoordination || hasT1 || currentUser.type === 'reporter') && (
+            {/* 3. AI Helpdesk Chat (Visible only to Admins/Technicians) */}
+            {isTechnician && (hasCoordination || hasT1) && (
               <button
                 id="nav-chat"
                 onClick={() => onViewChange('chat')}
@@ -160,7 +167,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             )}
 
             {/* 4. Complete Ticket Register (Accessible ONLY if Coordinator) */}
-            {hasCoordination && (
+            {isTechnician && hasCoordination && (
               <button
                 id="nav-board"
                 onClick={() => onViewChange('board')}
@@ -175,19 +182,21 @@ export const Navbar: React.FC<NavbarProps> = ({
               </button>
             )}
 
-            {/* 5. ITSM Architecture Reference */}
-            <button
-              id="nav-design"
-              onClick={() => onViewChange('design')}
-              className={`hidden lg:flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold transition ${
-                currentView === 'design'
-                  ? 'bg-gradient-to-r from-[#D4AF37] via-[#F3C64F] to-[#D4AF37] text-[#070F26] font-bold shadow-md shadow-[#D4AF37]/20 ring-1 ring-[#F5D880]'
-                  : 'text-blue-100/90 hover:bg-[#0E1C42] hover:text-[#F3C64F]'
-              }`}
-            >
-              <Layers className="h-3.5 w-3.5" />
-              <span className="whitespace-nowrap">Architettura ITSM</span>
-            </button>
+            {/* 5. ITSM Architecture Reference (Admins only) */}
+            {isTechnician && (
+              <button
+                id="nav-design"
+                onClick={() => onViewChange('design')}
+                className={`hidden lg:flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold transition ${
+                  currentView === 'design'
+                    ? 'bg-gradient-to-r from-[#D4AF37] via-[#F3C64F] to-[#D4AF37] text-[#070F26] font-bold shadow-md shadow-[#D4AF37]/20 ring-1 ring-[#F5D880]'
+                    : 'text-blue-100/90 hover:bg-[#0E1C42] hover:text-[#F3C64F]'
+                }`}
+              >
+                <Layers className="h-3.5 w-3.5" />
+                <span className="whitespace-nowrap">Architettura ITSM</span>
+              </button>
+            )}
           </nav>
 
           {/* Right Section: Active Account Display & Logout Button */}
@@ -202,10 +211,14 @@ export const Navbar: React.FC<NavbarProps> = ({
               <div className="text-left">
                 <div className="font-bold text-white text-xs leading-none flex items-center gap-1.5">
                   <span>{currentUser.displayName}</span>
-                  {/* Badges based on permissions */}
-                  {currentUser.type === 'reporter' ? (
-                    <span className="text-[9px] px-1.5 py-0.2 rounded bg-[#0E1F4B] text-blue-200 border border-[#1E3975]">
-                      Utente
+                  {/* Badges based on role */}
+                  {currentUser.isAdmin ? (
+                    <span className="text-[9px] px-1.5 py-0.2 rounded bg-[#D4AF37]/20 text-[#F3C64F] border border-[#D4AF37]/40 font-bold">
+                      🛡️ Admin
+                    </span>
+                  ) : currentUser.type === 'reporter' ? (
+                    <span className="text-[9px] px-1.5 py-0.2 rounded bg-slate-800 text-blue-200 border border-slate-700">
+                      👤 Utente
                     </span>
                   ) : (
                     <div className="flex items-center gap-1">
@@ -237,6 +250,30 @@ export const Navbar: React.FC<NavbarProps> = ({
                 </div>
               </div>
             </div>
+
+            {/* Change Password Button for all logged in accounts */}
+            <button
+              id="btn-change-password"
+              onClick={onOpenChangePasswordModal}
+              className="flex items-center gap-1 rounded-xl border border-[#1A3166] bg-[#0E1F4B]/90 px-2 sm:px-2.5 py-1.5 text-xs text-blue-200 hover:text-[#F3C64F] hover:border-[#D4AF37]/40 transition shadow-sm"
+              title="Modifica la password del tuo account"
+            >
+              <KeyRound className="h-3.5 w-3.5 text-[#F3C64F]" />
+              <span className="hidden md:inline text-[11px] font-semibold">Password</span>
+            </button>
+
+            {/* Register New Admin Button - ONLY FOR COORDINATORS (Piccirilli & users with coordination permission) */}
+            {hasCoordination && (
+              <button
+                id="btn-register-admin"
+                onClick={onOpenAdminRegisterModal}
+                className="flex items-center gap-1.5 rounded-xl border border-[#D4AF37]/60 bg-gradient-to-r from-[#D4AF37]/20 via-[#F3C64F]/20 to-[#D4AF37]/20 px-2.5 sm:px-3 py-1.5 text-xs font-bold text-[#F3C64F] hover:brightness-125 transition shadow-sm ring-1 ring-[#D4AF37]/30"
+                title="Registra un nuovo Utente Admin (Funzione abilitata dal ruolo di Coordinamento)"
+              >
+                <UserPlus className="h-3.5 w-3.5 text-[#F3C64F]" />
+                <span className="hidden sm:inline">Nuovo Admin</span>
+              </button>
+            )}
 
             {/* Logout / Disconnetti Button (Realistic Authentication) */}
             <button

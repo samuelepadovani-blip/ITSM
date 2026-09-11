@@ -42,6 +42,7 @@ export interface UserAccount {
   displayName: string;
   role: string;
   type: 'reporter' | 'technician';
+  isAdmin?: boolean;
   level: string;
   technicianId?: string;
   category: AssetCategory | 'Operazioni Generali';
