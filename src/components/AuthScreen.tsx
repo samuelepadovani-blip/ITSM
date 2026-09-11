@@ -234,7 +234,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
                     id="login-identifier"
                     value={loginIdentifier}
                     onChange={(e) => setLoginIdentifier(e.target.value)}
-                    placeholder="Es. benin@centro.internal, piccirilli, marco..."
+                    placeholder="Es. mario.rossi@centro.internal o username"
                     className="w-full rounded-xl border border-[#1A3166] bg-[#070F24] px-3.5 py-2.5 text-xs text-white placeholder-blue-300/40 focus:border-[#D4AF37] focus:outline-none focus:ring-1 focus:ring-[#D4AF37]/40"
                   />
                 </div>
@@ -282,10 +282,6 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
                   <ArrowRight className="h-4 w-4" />
                 </button>
               </form>
-
-              <div className="pt-2 text-center text-[11px] text-blue-300/60 leading-relaxed">
-                Gli account Amministratori di Reparto (Benin, Piccirilli, Padovani, Ayoub) accedono con le proprie credenziali dedicate. La password può essere aggiornata direttamente dalla propria schermata.
-              </div>
             </div>
           )}
 
