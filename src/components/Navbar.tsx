@@ -20,11 +20,12 @@ import {
   User,
   UserPlus,
   KeyRound,
-  Crown
+  Crown,
+  Server
 } from 'lucide-react';
 import { UserAccount } from '../types';
 
-export type ActiveView = 'portal' | 'inbox' | 'chat' | 'board' | 'design';
+export type ActiveView = 'portal' | 'inbox' | 'chat' | 'board' | 'design' | 'assets';
 
 interface NavbarProps {
   currentView: ActiveView;
@@ -182,7 +183,23 @@ export const Navbar: React.FC<NavbarProps> = ({
               </button>
             )}
 
-            {/* 5. ITSM Architecture Reference (Admins only) */}
+            {/* 5. Asset & Aree Inventory */}
+            {isTechnician && (
+              <button
+                id="nav-assets"
+                onClick={() => onViewChange('assets')}
+                className={`flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold transition ${
+                  currentView === 'assets'
+                    ? 'bg-gradient-to-r from-[#D4AF37] via-[#F3C64F] to-[#D4AF37] text-[#070F26] font-bold shadow-md shadow-[#D4AF37]/20 ring-1 ring-[#F5D880]'
+                    : 'text-blue-100/90 hover:bg-[#0E1C42] hover:text-[#F3C64F]'
+                }`}
+              >
+                <Server className="h-3.5 w-3.5" />
+                <span className="whitespace-nowrap">Asset & Aree</span>
+              </button>
+            )}
+
+            {/* 6. ITSM Architecture Reference (Admins only) */}
             {isTechnician && (
               <button
                 id="nav-design"

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { STAFF_MEMBERS, SLA_DEFINITIONS, ASSET_CATALOG } from '../data/itsmData';
+import { AssetCatalogView } from './AssetCatalogView';
 import { PriorityLevel } from '../types';
 import { 
   Network, 
@@ -137,7 +138,7 @@ export const ITSMDesignerView: React.FC = () => {
             }`}
           >
             <Server className="h-3.5 w-3.5" />
-            <span>Asset Censiti ({ASSET_CATALOG.length})</span>
+            <span>Asset per Aree & ID ({ASSET_CATALOG.length})</span>
           </button>
         </div>
       </div>
@@ -522,61 +523,10 @@ export const ITSMDesignerView: React.FC = () => {
         </div>
       )}
 
-      {/* 5. ASSET INVENTORY */}
+      {/* 5. ASSET INVENTORY DIVIDED BY AREAS & INDIVIDUAL IDs */}
       {activeTab === 'assets' && (
-        <div className="space-y-4">
-          <div className="rounded-xl border border-[#1A3166] bg-[#0A1636]/90 p-4">
-            <div className="flex items-center justify-between mb-4">
-              <h4 className="font-bold text-white text-sm">Registro Asset Censiti per Categoria</h4>
-              <span className="text-xs text-blue-300/70">Totale: {ASSET_CATALOG.length} asset monitorati</span>
-            </div>
-
-            <div className="overflow-x-auto">
-              <table className="w-full text-xs text-left text-blue-200">
-                <thead className="bg-[#070F24] text-blue-300 uppercase font-mono border-b border-[#1A3166]">
-                  <tr>
-                    <th className="p-3">Asset</th>
-                    <th className="p-3">Categoria</th>
-                    <th className="p-3">Tecnico T1/T2</th>
-                    <th className="p-3">Criticità</th>
-                    <th className="p-3">Descrizione Tecnica</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[#1A3166] font-sans">
-                  {ASSET_CATALOG.map((asset) => (
-                    <tr key={asset.id} className="hover:bg-[#0E1F4B]/50 transition">
-                      <td className="p-3 font-semibold text-white flex items-center gap-2">
-                        <span className="h-2 w-2 rounded-full bg-[#D4AF37]"></span>
-                        {asset.name}
-                      </td>
-                      <td className="p-3">
-                        <span className="rounded bg-[#070F24] px-2 py-0.5 text-blue-200 border border-[#1A3166]/50">
-                          {asset.category}
-                        </span>
-                      </td>
-                      <td className="p-3 font-semibold text-[#F3C64F]">
-                        {asset.assignedTechnician} ({asset.level})
-                      </td>
-                      <td className="p-3">
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                          asset.criticality === 'Critica' 
-                            ? 'bg-red-500/20 text-red-300 border border-red-500/40' 
-                            : asset.criticality === 'Alta' 
-                            ? 'bg-[#D4AF37]/15 text-[#F3C64F] border border-[#D4AF37]/40' 
-                            : 'bg-blue-500/20 text-blue-300 border border-blue-500/40'
-                        }`}>
-                          {asset.criticality}
-                        </span>
-                      </td>
-                      <td className="p-3 text-blue-300/70 max-w-xs truncate" title={asset.description}>
-                        {asset.description}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+        <div className="pt-2">
+          <AssetCatalogView />
         </div>
       )}
     </div>

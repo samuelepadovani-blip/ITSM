@@ -3,6 +3,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { GoogleGenAI } from '@google/genai';
 import dotenv from 'dotenv';
+import { ASSET_CATALOG } from './src/data/itsmData';
 
 dotenv.config();
 
@@ -850,6 +851,83 @@ app.get('/api/tickets', (req: Request, res: Response) => {
     tickets: result,
     total: ticketsStore.length,
     serverTime: new Date().toISOString(),
+  });
+});
+
+// In-memory Asset Store initialized from ASSET_CATALOG
+let assetsStore = [...ASSET_CATALOG];
+
+// REST: Get all assets (with optional area, category, status filters)
+app.get('/api/assets', (req: Request, res: Response) => {
+  const { area, category, status } = req.query;
+  let result = [...assetsStore];
+
+  if (area && typeof area === 'string' && area !== 'all') {
+    result = result.filter(a => (a.area || '').toLowerCase() === area.toLowerCase());
+  }
+  if (category && typeof category === 'string' && category !== 'all') {
+    result = result.filter(a => (a.category || '').toLowerCase() === category.toLowerCase());
+  }
+  if (status && typeof status === 'string' && status !== 'all') {
+    result = result.filter(a => (a.status || 'Operativo').toLowerCase() === status.toLowerCase());
+  }
+
+  res.json({
+    assets: result,
+    total: assetsStore.length,
+  });
+});
+
+// REST: Create a new asset with unique ID and area assignment
+app.post('/api/assets', (req: Request, res: Response) => {
+  const {
+    id,
+    name,
+    area,
+    category = 'Gaming & Cassa',
+    assignedTechnician = 'Benin',
+    level = 'T2',
+    criticality = 'Alta',
+    status = 'Operativo',
+    location = '',
+    serialNumber = '',
+    description = '',
+  } = req.body;
+
+  if (!id || typeof id !== 'string' || !id.trim()) {
+    return res.status(400).json({ error: "ID identificativo dell'asset obbligatorio." });
+  }
+
+  const cleanId = id.trim().toUpperCase();
+  if (assetsStore.some(a => a.id.toUpperCase() === cleanId)) {
+    return res.status(400).json({ error: `L'ID "${cleanId}" è già associato ad un altro asset censito.` });
+  }
+
+  if (!name || typeof name !== 'string' || !name.trim()) {
+    return res.status(400).json({ error: "Nome descrittivo dell'asset obbligatorio." });
+  }
+
+  const newAsset = {
+    id: cleanId,
+    name: name.trim(),
+    area: (area && typeof area === 'string') ? area.trim() : 'Area Gaming & Sala Slot',
+    category,
+    assignedTechnician,
+    level,
+    criticality,
+    status,
+    location: location.trim() || `Presso ${area || 'sala'}`,
+    serialNumber: serialNumber.trim() || `SN-${cleanId}`,
+    description: description.trim() || `Asset registrato nel sistema ITSM per ${area || 'il centro'}.`,
+  };
+
+  assetsStore.unshift(newAsset);
+  console.log(`[ASSET CREATED] New asset registered: ${cleanId} in area "${newAsset.area}"`);
+
+  res.status(201).json({
+    success: true,
+    asset: newAsset,
+    message: `Asset ${cleanId} registrato con successo nell'${newAsset.area}!`,
   });
 });
 

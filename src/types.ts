@@ -19,11 +19,15 @@ export interface StaffMember {
 export interface AssetInfo {
   id: string;
   name: string;
+  area: string;
   category: AssetCategory;
   assignedTechnician: string;
   level: string;
   criticality: 'Alta' | 'Media' | 'Critica';
   description: string;
+  status?: 'Operativo' | 'In Manutenzione' | 'Guasto / Degradato';
+  location?: string;
+  serialNumber?: string;
 }
 
 export type TechnicianId = 'piccirilli' | 'benin' | 'padovani' | 'ayoub' | 'all';

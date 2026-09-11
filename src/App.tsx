@@ -7,6 +7,7 @@ import { UserReportPortal } from './components/UserReportPortal';
 import { TechnicianInboxView } from './components/TechnicianInboxView';
 import { HelpdeskChat } from './components/HelpdeskChat';
 import { ITSMDesignerView } from './components/ITSMDesignerView';
+import { AssetCatalogView } from './components/AssetCatalogView';
 import { TicketBoardView } from './components/TicketBoardView';
 import { OnlineLiveModal } from './components/OnlineLiveModal';
 import { TransferTicketModal } from './components/TransferTicketModal';
@@ -535,6 +536,18 @@ Prendi in carico il problema e forniscimi subito la serie completa di passaggi o
 
         {/* 5. ITSM Manual & Architecture Reference (Admins only) */}
         {currentUser.type === 'technician' && currentView === 'design' && <ITSMDesignerView />}
+
+        {/* 6. Asset & Aree Management (Admins & Technicians) */}
+        {currentUser.type === 'technician' && currentView === 'assets' && (
+          <AssetCatalogView 
+            currentUser={currentUser}
+            onReportIssueForAsset={(asset) => {
+              const prompt = `Segnalazione immediata di anomalia operativa per l'Asset [${asset.id}]: "${asset.name}" (${asset.area}, ${asset.location || 'in sala'}). Fornisci diagnosi e passaggi di risoluzione.`;
+              setAiChatInitialPrompt(prompt);
+              setCurrentView('chat');
+            }}
+          />
+        )}
       </main>
 
       {/* Operational Footer Bar */}
