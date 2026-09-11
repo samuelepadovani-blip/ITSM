@@ -204,6 +204,10 @@ export default function App() {
   };
 
   const handleStatusChange = async (ticketId: string, newStatus: TicketStatus, note?: string) => {
+    const isResolving = newStatus === 'Risolto' || newStatus === 'Chiuso';
+    let calculatedDuration: number | undefined;
+    const nowIso = new Date().toISOString();
+
     // 1. Optimistic UI update
     setTickets((prev) =>
       prev.map((t) => {
@@ -219,12 +223,29 @@ export default function App() {
           ];
           const newNotes = note ? [...(t.notes || []), `[${nowTime} - ${currentUser.displayName}]: ${note}`] : t.notes;
 
+          let dur = t.durationMinutes;
+          if (isResolving && !dur) {
+            const created = t.createdAtIso ? new Date(t.createdAtIso).getTime() : new Date(t.timestamp).getTime();
+            if (!isNaN(created)) {
+              dur = Math.max(5, Math.round((Date.now() - created) / 60000));
+            } else {
+              dur = 25;
+            }
+          }
+          calculatedDuration = dur;
+
           return {
             ...t,
             status: newStatus,
             history: newHistory,
             notes: newNotes,
-            updatedAt: new Date().toISOString(),
+            updatedAt: nowIso,
+            ...(isResolving ? {
+              resolvedAtIso: t.resolvedAtIso || nowIso,
+              resolvedBy: t.resolvedBy || currentUser.displayName,
+              resolutionNotes: note || t.resolutionNotes || t.actionRequired || 'Intervento completato con verifica di funzionamento.',
+              durationMinutes: dur,
+            } : {}),
           };
         }
         return t;
@@ -236,7 +257,15 @@ export default function App() {
       await fetch(`/api/tickets/${ticketId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus, note, updatedBy: currentUser.displayName }),
+        body: JSON.stringify({ 
+          status: newStatus, 
+          note, 
+          updatedBy: currentUser.displayName,
+          resolvedAtIso: isResolving ? nowIso : undefined,
+          resolvedBy: isResolving ? currentUser.displayName : undefined,
+          resolutionNotes: isResolving ? (note || 'Intervento completato con verifica di funzionamento.') : undefined,
+          durationMinutes: calculatedDuration,
+        }),
       });
     } catch (e) {
       console.error('Failed to sync status change to server:', e);
@@ -535,12 +564,16 @@ Prendi in carico il problema e forniscimi subito la serie completa di passaggi o
         )}
 
         {/* 5. ITSM Manual & Architecture Reference (Admins only) */}
-        {currentUser.type === 'technician' && currentView === 'design' && <ITSMDesignerView />}
+        {currentUser.type === 'technician' && currentView === 'design' && (
+          <ITSMDesignerView allTickets={tickets} onAskAI={handleAskAI} />
+        )}
 
         {/* 6. Asset & Aree Management (Admins & Technicians) */}
         {currentUser.type === 'technician' && currentView === 'assets' && (
           <AssetCatalogView 
             currentUser={currentUser}
+            allTickets={tickets}
+            onAskAI={(ticket) => handleAskAI(ticket)}
             onReportIssueForAsset={(asset) => {
               const prompt = `Segnalazione immediata di anomalia operativa per l'Asset [${asset.id}]: "${asset.name}" (${asset.area}, ${asset.location || 'in sala'}). Fornisci diagnosi e passaggi di risoluzione.`;
               setAiChatInitialPrompt(prompt);

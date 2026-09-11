@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { STAFF_MEMBERS, SLA_DEFINITIONS, ASSET_CATALOG } from '../data/itsmData';
 import { AssetCatalogView } from './AssetCatalogView';
-import { PriorityLevel } from '../types';
+import { PriorityLevel, ITSMTicket } from '../types';
 import { 
   Network, 
   Layers, 
@@ -20,7 +20,15 @@ import {
   Info
 } from 'lucide-react';
 
-export const ITSMDesignerView: React.FC = () => {
+interface ITSMDesignerViewProps {
+  allTickets?: ITSMTicket[];
+  onAskAI?: (ticket: ITSMTicket) => void;
+}
+
+export const ITSMDesignerView: React.FC<ITSMDesignerViewProps> = ({
+  allTickets,
+  onAskAI,
+}) => {
   const [selectedImpact, setSelectedImpact] = useState<'Alto' | 'Medio' | 'Basso'>('Alto');
   const [selectedUrgency, setSelectedUrgency] = useState<'Alta' | 'Media' | 'Bassa'>('Alta');
   const [activeTab, setActiveTab] = useState<'routing' | 'matrix' | 'sla' | 'assets' | 'staff'>('routing');
@@ -526,7 +534,7 @@ export const ITSMDesignerView: React.FC = () => {
       {/* 5. ASSET INVENTORY DIVIDED BY AREAS & INDIVIDUAL IDs */}
       {activeTab === 'assets' && (
         <div className="pt-2">
-          <AssetCatalogView />
+          <AssetCatalogView allTickets={allTickets} onAskAI={onAskAI} />
         </div>
       )}
     </div>

@@ -90,6 +90,11 @@ export interface ITSMTicket {
   rawResponse?: string;
   status: TicketStatus;
   updatedAt?: string;
+  assetId?: string;
+  resolvedAtIso?: string;
+  resolvedBy?: string;
+  resolutionNotes?: string;
+  durationMinutes?: number;
   notes?: string[];
   history?: Array<{
     timestamp: string;

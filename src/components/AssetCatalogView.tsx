@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { AssetInfo, AssetCategory } from '../types';
-import { ASSET_CATALOG, ASSET_AREAS, AssetAreaInfo } from '../data/itsmData';
+import { AssetInfo, AssetCategory, ITSMTicket } from '../types';
+import { ASSET_CATALOG, ASSET_AREAS, AssetAreaInfo, INITIAL_TICKETS } from '../data/itsmData';
 import { AddAssetModal } from './AddAssetModal';
+import { AssetTicketReportModal, isTicketForAsset } from './AssetTicketReportModal';
 import { 
   Plus, 
   Search, 
@@ -26,18 +27,38 @@ import {
   RefreshCw,
   FolderPlus,
   ArrowRight,
-  SlidersHorizontal
+  SlidersHorizontal,
+  BarChart3,
+  ChevronRight,
+  Clock,
+  History
 } from 'lucide-react';
 
 interface AssetCatalogViewProps {
   onReportIssueForAsset?: (asset: AssetInfo) => void;
+  onAskAI?: (ticket: ITSMTicket) => void;
   currentUser?: any;
+  allTickets?: ITSMTicket[];
 }
 
 export const AssetCatalogView: React.FC<AssetCatalogViewProps> = ({
   onReportIssueForAsset,
+  onAskAI,
   currentUser,
+  allTickets,
 }) => {
+  // Modal state for Ticket Report
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [reportModalAssetId, setReportModalAssetId] = useState<string>('all');
+
+  // Tickets list
+  const [localTickets, setLocalTickets] = useState<ITSMTicket[]>(allTickets || INITIAL_TICKETS);
+
+  useEffect(() => {
+    if (allTickets && allTickets.length > 0) {
+      setLocalTickets(allTickets);
+    }
+  }, [allTickets]);
   // Master asset list, initialized from ASSET_CATALOG and synced with server
   const [assets, setAssets] = useState<AssetInfo[]>(() => {
     const saved = localStorage.getItem('itsm_custom_assets');
@@ -222,6 +243,14 @@ export const AssetCatalogView: React.FC<AssetCatalogViewProps> = ({
   const maintenanceCount = assets.filter(a => a.status === 'In Manutenzione').length;
   const errorCount = assets.filter(a => a.status === 'Guasto / Degradato').length;
 
+  const totalResolvedTickets = useMemo(() => {
+    return localTickets.filter(t => t.status === 'Risolto' || t.status === 'Chiuso').length;
+  }, [localTickets]);
+
+  const totalUnresolvedTickets = useMemo(() => {
+    return localTickets.filter(t => t.status !== 'Risolto' && t.status !== 'Chiuso').length;
+  }, [localTickets]);
+
   return (
     <div id="asset-catalog-view-root" className="max-w-7xl mx-auto space-y-6 pb-12">
       {/* Success Toast */}
@@ -256,8 +285,23 @@ export const AssetCatalogView: React.FC<AssetCatalogViewProps> = ({
             </p>
           </div>
 
-          {/* Primary Action Button: Add Asset */}
+          {/* Action Buttons: Report & Add Asset */}
           <div className="flex flex-wrap items-center gap-3">
+            <button
+              id="btn-open-ticket-report-modal"
+              onClick={() => {
+                setReportModalAssetId('all');
+                setIsReportModalOpen(true);
+              }}
+              className="flex items-center gap-2.5 rounded-xl border border-[#D4AF37]/50 bg-[#0E1F4B] hover:bg-[#D4AF37]/20 px-4 py-3 text-xs font-black text-[#F3C64F] shadow-lg shadow-[#D4AF37]/10 transition active:scale-95"
+            >
+              <BarChart3 className="h-4 w-4 text-[#D4AF37]" />
+              <span>Report Ticket & Risoluzioni</span>
+              <span className="rounded-full bg-[#D4AF37]/25 border border-[#D4AF37]/50 px-2 py-0.5 text-[10px] font-mono text-white font-bold">
+                {totalResolvedTickets} Risolti
+              </span>
+            </button>
+
             <button
               id="btn-open-add-asset-modal"
               onClick={() => handleOpenAddModalForArea()}
@@ -270,7 +314,7 @@ export const AssetCatalogView: React.FC<AssetCatalogViewProps> = ({
         </div>
 
         {/* Stats Strip */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6 pt-6 border-t border-[#1A3166]/80">
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mt-6 pt-6 border-t border-[#1A3166]/80">
           <div className="rounded-xl border border-[#1A3166] bg-[#070F24]/80 p-3 flex items-center gap-3">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#D4AF37]/15 text-[#F3C64F] border border-[#D4AF37]/30">
               <Hash className="h-5 w-5" />
@@ -308,6 +352,29 @@ export const AssetCatalogView: React.FC<AssetCatalogViewProps> = ({
             <div>
               <p className="text-[11px] font-semibold text-blue-300/70">Segnalati / Guasti</p>
               <p className="text-lg font-black text-red-400 font-mono">{errorCount}</p>
+            </div>
+          </div>
+
+          <div 
+            onClick={() => {
+              setReportModalAssetId('all');
+              setIsReportModalOpen(true);
+            }}
+            className="rounded-xl border border-[#D4AF37]/40 bg-[#070F24]/80 p-3 flex items-center gap-3 cursor-pointer hover:border-[#D4AF37] hover:bg-[#0E1F4B] transition col-span-2 sm:col-span-1"
+            title="Clicca per aprire il Report Dettagliato Ticket"
+          >
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#D4AF37]/15 text-[#F3C64F] border border-[#D4AF37]/30">
+              <BarChart3 className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="text-[11px] font-semibold text-[#F3C64F] flex items-center gap-1">
+                <span>Ticket Risolti</span>
+                <ChevronRight className="h-3 w-3" />
+              </p>
+              <div className="flex items-center gap-1.5">
+                <span className="text-lg font-black text-white font-mono">{totalResolvedTickets}</span>
+                <span className="text-[10px] text-blue-300/70 font-mono">({totalUnresolvedTickets} aperti)</span>
+              </div>
             </div>
           </div>
         </div>
@@ -479,6 +546,10 @@ export const AssetCatalogView: React.FC<AssetCatalogViewProps> = ({
                             ? 'bg-[#D4AF37]/15 text-[#F3C64F] border-[#D4AF37]/40'
                             : 'bg-blue-500/15 text-blue-400 border-blue-500/30';
 
+                        const assetTickets = localTickets.filter(t => isTicketForAsset(t, asset));
+                        const resolvedOnAsset = assetTickets.filter(t => t.status === 'Risolto' || t.status === 'Chiuso').length;
+                        const unresolvedOnAsset = assetTickets.filter(t => t.status !== 'Risolto' && t.status !== 'Chiuso').length;
+
                         return (
                           <div
                             key={asset.id}
@@ -520,8 +591,53 @@ export const AssetCatalogView: React.FC<AssetCatalogViewProps> = ({
                               </p>
                             </div>
 
+                            {/* Ticket Resolution Metric Row */}
+                            <div className="mt-3.5 p-2 rounded-lg bg-[#0E1F4B]/50 border border-[#1A3166] flex items-center justify-between gap-2">
+                              <div className="flex items-center gap-1.5">
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setReportModalAssetId(asset.id);
+                                    setIsReportModalOpen(true);
+                                  }}
+                                  className="inline-flex items-center gap-1 rounded-md bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/35 px-2 py-0.5 text-[10px] font-bold text-emerald-300 transition"
+                                  title={`Clicca per visualizzare i ${resolvedOnAsset} ticket risolti per ${asset.id}`}
+                                >
+                                  <CheckCircle2 className="h-3 w-3 text-emerald-400" />
+                                  <span>{resolvedOnAsset} Risolti</span>
+                                </button>
+
+                                {unresolvedOnAsset > 0 && (
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setReportModalAssetId(asset.id);
+                                      setIsReportModalOpen(true);
+                                    }}
+                                    className="inline-flex items-center gap-1 rounded-md bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 px-2 py-0.5 text-[10px] font-bold text-amber-300 transition"
+                                    title={`${unresolvedOnAsset} ticket in lavorazione per ${asset.id}`}
+                                  >
+                                    <Clock className="h-3 w-3 text-amber-400 animate-pulse" />
+                                    <span>{unresolvedOnAsset} In Corso</span>
+                                  </button>
+                                )}
+                              </div>
+
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setReportModalAssetId(asset.id);
+                                  setIsReportModalOpen(true);
+                                }}
+                                className="flex items-center gap-0.5 text-[10px] font-bold text-[#F3C64F] hover:text-[#D4AF37] hover:underline"
+                              >
+                                <span>Report</span>
+                                <ChevronRight className="h-3 w-3" />
+                              </button>
+                            </div>
+
                             {/* Bottom Specs & Technician Info */}
-                            <div className="mt-4 pt-3 border-t border-[#1A3166]/80 flex flex-wrap items-center justify-between gap-2 text-[11px]">
+                            <div className="mt-3 pt-2.5 border-t border-[#1A3166]/80 flex flex-wrap items-center justify-between gap-2 text-[11px]">
                               <div className="flex items-center gap-1 text-blue-300/70 font-mono">
                                 <Tag className="h-3 w-3 text-blue-400" />
                                 <span className="truncate max-w-[110px]" title={asset.serialNumber || asset.id}>
@@ -573,6 +689,7 @@ export const AssetCatalogView: React.FC<AssetCatalogViewProps> = ({
                   <th className="p-3.5">Stato</th>
                   <th className="p-3.5">Tecnico (Livello)</th>
                   <th className="p-3.5">Criticità</th>
+                  <th className="p-3.5 text-center">Ticket Risolti</th>
                   <th className="p-3.5">Matricola / Serial</th>
                   {onReportIssueForAsset && <th className="p-3.5 text-right">Azione</th>}
                 </tr>
@@ -586,6 +703,9 @@ export const AssetCatalogView: React.FC<AssetCatalogViewProps> = ({
                       : asset.status === 'In Manutenzione'
                       ? 'bg-yellow-500/20 text-yellow-300 border-yellow-500/40'
                       : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40';
+
+                  const assetTickets = localTickets.filter(t => isTicketForAsset(t, asset));
+                  const resolvedOnAsset = assetTickets.filter(t => t.status === 'Risolto' || t.status === 'Chiuso').length;
 
                   return (
                     <tr key={asset.id} className="hover:bg-[#0E1F4B]/50 transition">
@@ -640,6 +760,21 @@ export const AssetCatalogView: React.FC<AssetCatalogViewProps> = ({
                         </span>
                       </td>
 
+                      {/* Ticket Risolti Column */}
+                      <td className="p-3.5 text-center">
+                        <button
+                          onClick={() => {
+                            setReportModalAssetId(asset.id);
+                            setIsReportModalOpen(true);
+                          }}
+                          className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/35 px-2.5 py-1 text-xs font-bold text-emerald-300 transition"
+                          title={`Visualizza i ${resolvedOnAsset} ticket risolti per ${asset.id}`}
+                        >
+                          <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
+                          <span>{resolvedOnAsset} Risolti</span>
+                        </button>
+                      </td>
+
                       {/* Serial Column */}
                       <td className="p-3.5 font-mono text-[11px] text-blue-300/70">
                         {asset.serialNumber || `SN-${asset.id}`}
@@ -673,6 +808,16 @@ export const AssetCatalogView: React.FC<AssetCatalogViewProps> = ({
         existingAreas={distinctAreas}
         initialArea={modalInitialArea}
         existingAssetIds={existingAssetIds}
+      />
+
+      {/* Ticket Report Modal per Asset & Aree */}
+      <AssetTicketReportModal
+        isOpen={isReportModalOpen}
+        onClose={() => setIsReportModalOpen(false)}
+        allTickets={localTickets}
+        assets={assets}
+        initialAssetId={reportModalAssetId}
+        onAskAI={onAskAI}
       />
     </div>
   );

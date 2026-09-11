@@ -357,6 +357,11 @@ export interface StoredTicket {
   actionRequired: string;
   rawResponse: string;
   status: 'Aperto' | 'In Lavorazione' | 'Escalato T3' | 'In Attesa Fornitore' | 'Risolto' | 'Chiuso';
+  assetId?: string;
+  resolvedAtIso?: string;
+  resolvedBy?: string;
+  resolutionNotes?: string;
+  durationMinutes?: number;
   history: Array<{
     timestamp: string;
     action: string;
@@ -391,8 +396,9 @@ const INITIAL_SERVER_TICKETS: StoredTicket[] = [
     createdAtIso: new Date(Date.now() - 3600000).toISOString(),
     reporterName: 'Marco (Staff Casse)',
     reporterZone: 'Sala Slot Nord',
-    userMessage: 'Slot Machine n. 14 con gettoniera inceppata e schermo lampeggiante',
-    asset: 'Slot',
+    userMessage: 'Slot Machine AWP Book of Ra con gettoniera inceppata e schermo lampeggiante',
+    asset: 'Slot Machine AWP Book of Ra #1',
+    assetId: 'SLOT-AWP-01',
     category: 'Gaming',
     priority: 'P3',
     sla: 'P3 Medio - Presa in carico < 2h / Risoluzione < 8h',
@@ -416,17 +422,18 @@ const INITIAL_SERVER_TICKETS: StoredTicket[] = [
     createdAtIso: new Date(Date.now() - 2400000).toISOString(),
     reporterName: 'Sara (Caposala Bar)',
     reporterZone: 'Bancone Bar Centrale',
-    userMessage: 'Macchinetta del caffè a 3 gruppi con pressione vapore a zero e perdita acqua inferiore',
-    asset: 'Macchinetta del caffè',
+    userMessage: 'Tostapane Industriale con resistenza sinistra non riscaldante',
+    asset: 'Tostapane Industriale a Nastro 4 Slot',
+    assetId: 'BAR-TOAST-01',
     category: 'F&B',
-    priority: 'P2',
-    sla: 'P2 Alto - Presa in carico < 30 min / Risoluzione < 4h',
+    priority: 'P3',
+    sla: 'P3 Medio - Presa in carico < 2h / Risoluzione < 8h',
     assignedTo: 'Ayoub (Food & Beverage Coordinator)',
     assignedTechnicianId: 'ayoub',
     escalationT3: false,
     escalationT3Note: 'NO',
-    actionRequired: 'Intervento immediato di Ayoub per controllo guarnizioni e valvola di sicurezza caldaia.',
-    rawResponse: 'Ticket F&B prioritario bar.',
+    actionRequired: 'Intervento immediato di Ayoub per controllo resistenza e termostato.',
+    rawResponse: 'Ticket F&B.',
     status: 'Aperto',
     notes: [],
     history: [
@@ -439,9 +446,10 @@ const INITIAL_SERVER_TICKETS: StoredTicket[] = [
     timestamp: '09:30',
     createdAtIso: new Date(Date.now() - 1200000).toISOString(),
     reporterName: 'Davide (Reception & Accoglienza)',
-    reporterZone: 'Area Bowling & Sala Eventi',
-    userMessage: 'Ventilazione UTA 2 bloccata con allarme sovraccarico termico e odore di bruciato',
-    asset: 'Sistema di ventilazione',
+    reporterZone: 'Area Climatizzazione & Impianti',
+    userMessage: 'Ventilazione UTA 1 bloccata con allarme sovraccarico termico e flusso ridotto',
+    asset: 'Unità Trattamento Aria UTA 1 (Sala Slot & Gaming)',
+    assetId: 'UTA-01',
     category: 'Facility',
     priority: 'P2',
     sla: 'P2 Alto - Presa in carico < 30 min / Risoluzione < 4h',
@@ -462,10 +470,15 @@ const INITIAL_SERVER_TICKETS: StoredTicket[] = [
     ticketId: 'TCK-20260904-404',
     timestamp: '07:30',
     createdAtIso: new Date(Date.now() - 7200000).toISOString(),
+    resolvedAtIso: new Date(Date.now() - 4500000).toISOString(),
+    resolvedBy: 'Piccirilli (IT & Systems Manager)',
+    durationMinutes: 45,
+    resolutionNotes: 'Sostituito patch cable di uplink guasto e riavviato modulo switch Cisco Catalyst 24 porte con ripristino stream video 4K su NVR.',
     reporterName: 'Amministrazione Centro',
     reporterZone: 'Cassa Centrale & Rete',
     userMessage: 'Switch PoE piano terra non risponde e telecamere di cassa spente',
-    asset: 'Sistema di rete',
+    asset: 'Switch Managed Cisco Catalyst 24 Porte PoE+ (Rack Principale)',
+    assetId: 'NET-SW-01',
     category: 'IT',
     priority: 'P1',
     sla: 'P1 Critico - Presa in carico < 15 min / Risoluzione < 2h',
@@ -481,6 +494,66 @@ const INITIAL_SERVER_TICKETS: StoredTicket[] = [
       { timestamp: '07:30', action: 'Segnalazione creata da monitoraggio di sicurezza', by: 'Amministrazione' },
       { timestamp: '07:35', action: 'Presa in carico da Piccirilli', by: 'Piccirilli' },
       { timestamp: '08:15', action: 'Risolto con ripristino completo delle videocamere', by: 'Piccirilli' }
+    ]
+  },
+  {
+    id: 'srv-5',
+    ticketId: 'TCK-20260904-405',
+    timestamp: '06:15',
+    createdAtIso: new Date(Date.now() - 14400000).toISOString(),
+    resolvedAtIso: new Date(Date.now() - 12600000).toISOString(),
+    resolvedBy: 'Benin (Gaming & Cash Technician)',
+    durationMinutes: 30,
+    resolutionNotes: 'Pulito e calibrato gruppo ottico accettore banconote NV9 su Slot VLT Spielo #1; eseguito reset allarme di inceppamento e test banconote con esito regolare.',
+    reporterName: 'Operatore Sala Slot',
+    reporterZone: 'Sala Slot Gaming',
+    userMessage: 'Slot VLT Spielo Diversity #1 con errore codice 42 lettore banconote bloccato',
+    asset: 'Slot Machine VLT Spielo Diversity #1',
+    assetId: 'SLOT-VLT-01',
+    category: 'Gaming',
+    priority: 'P2',
+    sla: 'P2 Alto - Presa in carico < 30 min / Risoluzione < 4h',
+    assignedTo: 'Benin (Gaming & Cash Technician)',
+    assignedTechnicianId: 'benin',
+    escalationT3: false,
+    escalationT3Note: 'NO',
+    actionRequired: 'Rimozione inceppamento e test banconote.',
+    rawResponse: 'Ticket Gaming.',
+    status: 'Risolto',
+    notes: [],
+    history: [
+      { timestamp: '06:15', action: 'Segnalato da sala gaming', by: 'Operatore Sala' },
+      { timestamp: '06:45', action: 'Riparazione completata da Benin', by: 'Benin' }
+    ]
+  },
+  {
+    id: 'srv-6',
+    ticketId: 'TCK-20260904-406',
+    timestamp: '05:30',
+    createdAtIso: new Date(Date.now() - 18000000).toISOString(),
+    resolvedAtIso: new Date(Date.now() - 15600000).toISOString(),
+    resolvedBy: 'Benin (Gaming & Cash Technician)',
+    durationMinutes: 40,
+    resolutionNotes: 'Sbloccato cassetto automatico banconote Glory CI-10 Cassa 1: rimosso lembo banconota deformata ed eseguito riallineamento cassetto col gestionale.',
+    reporterName: 'Capo Cassa',
+    reporterZone: 'Postazione Cassa 1',
+    userMessage: 'Cassa Glory CI-10 con cassetto banconote bloccato in fase di erogazione resto',
+    asset: 'Cassa Automatica Glory CI-10 (Cassa 1)',
+    assetId: 'CASSA-01',
+    category: 'Gaming',
+    priority: 'P1',
+    sla: 'P1 Critico - Presa in carico < 15 min / Risoluzione < 2h',
+    assignedTo: 'Benin (Gaming & Cash Technician)',
+    assignedTechnicianId: 'benin',
+    escalationT3: false,
+    escalationT3Note: 'NO',
+    actionRequired: 'Sblocco cassetto banconote Glory.',
+    rawResponse: 'Ticket Cassa P1.',
+    status: 'Risolto',
+    notes: [],
+    history: [
+      { timestamp: '05:30', action: 'Apertura ticket urgente cassa', by: 'Capo Cassa' },
+      { timestamp: '06:10', action: 'Risolto: Glory operativa e contante verificato', by: 'Benin' }
     ]
   }
 ];
@@ -1063,6 +1136,18 @@ app.patch('/api/tickets/:ticketId', (req: Request, res: Response) => {
       action: `Stato aggiornato a: ${status}`,
       by: updatedBy
     });
+
+    if (status === 'Risolto' || status === 'Chiuso') {
+      ticket.resolvedAtIso = req.body.resolvedAtIso || new Date().toISOString();
+      ticket.resolvedBy = req.body.resolvedBy || updatedBy;
+      ticket.resolutionNotes = req.body.resolutionNotes || note || ticket.actionRequired || 'Intervento completato con verifica funzionale.';
+      if (req.body.durationMinutes) {
+        ticket.durationMinutes = req.body.durationMinutes;
+      } else if (!ticket.durationMinutes) {
+        const created = ticket.createdAtIso ? new Date(ticket.createdAtIso).getTime() : new Date(ticket.timestamp).getTime();
+        ticket.durationMinutes = !isNaN(created) ? Math.max(5, Math.round((Date.now() - created) / 60000)) : 30;
+      }
+    }
   }
 
   if (note && typeof note === 'string' && note.trim().length > 0) {
