@@ -51,7 +51,7 @@ export const TransferTicketModal: React.FC<TransferTicketModalProps> = ({
   const getTargetIcon = (id: string) => {
     switch (id) {
       case 'benin':
-        return <Gamepad2 className="h-4 w-4 text-amber-400" />;
+        return <Gamepad2 className="h-4 w-4 text-[#D4AF37]" />;
       case 'padovani':
         return <Building2 className="h-4 w-4 text-emerald-400" />;
       case 'ayoub':
@@ -96,31 +96,31 @@ export const TransferTicketModal: React.FC<TransferTicketModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="w-full max-w-lg rounded-2xl border border-slate-700/80 bg-slate-900 shadow-2xl p-5 sm:p-6 space-y-5 text-slate-100 ring-1 ring-white/10">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200">
+      <div className="w-full max-w-lg rounded-2xl border border-[#1A3166] bg-[#0A1636] shadow-2xl p-5 sm:p-6 space-y-5 text-blue-100 ring-1 ring-[#D4AF37]/30">
         
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+        <div className="flex items-center justify-between border-b border-[#1A3166] pb-4">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-400">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#D4AF37]/10 border border-[#D4AF37]/30 text-[#D4AF37]">
               <ArrowRightLeft className="h-5 w-5" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-white flex items-center gap-2">
+              <h3 className="text-base font-bold text-[#F3C64F] flex items-center gap-2">
                 <span>Sposta Ticket di Livello</span>
-                <span className="font-mono text-xs px-2 py-0.5 rounded bg-slate-800 text-cyan-300">
+                <span className="font-mono text-xs px-2 py-0.5 rounded bg-[#070F24] text-[#F3C64F] border border-[#1A3166]">
                   #{ticket.ticketId}
                 </span>
               </h3>
-              <p className="text-xs text-slate-400">
-                Asset: <strong className="text-white">{ticket.asset}</strong> • Attualmente a: <span className="text-cyan-300">{ticket.assignedTo}</span>
+              <p className="text-xs text-blue-300/70">
+                Asset: <strong className="text-white">{ticket.asset}</strong> • Attualmente a: <span className="text-[#F3C64F]">{ticket.assignedTo}</span>
               </p>
             </div>
           </div>
 
           <button
             onClick={onClose}
-            className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-white transition"
+            className="rounded-lg p-1.5 text-blue-300 hover:bg-[#0E1F4B] hover:text-white transition"
           >
             <X className="h-5 w-5" />
           </button>
@@ -130,7 +130,7 @@ export const TransferTicketModal: React.FC<TransferTicketModalProps> = ({
         <form onSubmit={handleSubmit} className="space-y-4 text-xs">
           {/* Target Technician Selection */}
           <div className="space-y-1.5">
-            <label className="font-bold text-slate-300 block">
+            <label className="font-bold text-blue-200 block">
               1. Seleziona il Nuovo Livello / Tecnico Ricevente:
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -146,8 +146,8 @@ export const TransferTicketModal: React.FC<TransferTicketModalProps> = ({
                   }}
                   className={`flex items-start gap-2.5 p-3 rounded-xl border text-left transition ${
                     selectedTarget === target.id
-                      ? 'border-cyan-500/80 bg-cyan-950/40 text-white ring-1 ring-cyan-500/40'
-                      : 'border-slate-800 bg-slate-950/60 text-slate-300 hover:border-slate-700'
+                      ? 'border-[#D4AF37] bg-[#0E1F4B] text-white ring-1 ring-[#D4AF37]/40'
+                      : 'border-[#1A3166] bg-[#070F24]/80 text-blue-200 hover:border-[#D4AF37]/50'
                   }`}
                 >
                   <div className="mt-0.5 shrink-0">
@@ -157,10 +157,10 @@ export const TransferTicketModal: React.FC<TransferTicketModalProps> = ({
                     <div className="font-bold text-xs flex items-center gap-1.5">
                       <span>{target.displayName}</span>
                     </div>
-                    <div className="text-[10px] text-slate-400 truncate">
+                    <div className="text-[10px] text-blue-300/70 truncate">
                       {target.level}
                     </div>
-                    <div className="text-[10px] text-cyan-400/80 mt-0.5">
+                    <div className="text-[10px] text-[#F3C64F] mt-0.5 font-medium">
                       {target.category}
                     </div>
                   </div>
@@ -177,7 +177,7 @@ export const TransferTicketModal: React.FC<TransferTicketModalProps> = ({
                 id="check-t3"
                 checked={isEscalateT3}
                 onChange={(e) => setIsEscalateT3(e.target.checked)}
-                className="mt-0.5 rounded border-purple-400 text-purple-600 focus:ring-purple-500 bg-slate-900"
+                className="mt-0.5 rounded border-purple-400 text-purple-600 focus:ring-purple-500 bg-[#070F24]"
               />
               <label htmlFor="check-t3" className="cursor-pointer text-[11px] text-purple-200">
                 <strong className="block text-purple-300 font-semibold">
@@ -190,35 +190,35 @@ export const TransferTicketModal: React.FC<TransferTicketModalProps> = ({
 
           {/* Quick Presets for Reasons */}
           <div className="space-y-1.5">
-            <span className="font-semibold text-slate-400 block text-[11px]">
+            <span className="font-semibold text-blue-300/70 block text-[11px]">
               Motivazioni rapide consigliate:
             </span>
             <div className="flex flex-wrap gap-1.5">
               <button
                 type="button"
                 onClick={() => handleQuickReason('Richiede ricambio originale o assistenza costruttore esterno (garanzia/contratto)', true)}
-                className="rounded-lg bg-slate-800/80 hover:bg-slate-700 px-2 py-1 text-[10px] text-purple-300 border border-purple-500/30 transition"
+                className="rounded-lg bg-[#0E1F4B] hover:bg-[#152B66] px-2 py-1 text-[10px] text-purple-300 border border-purple-500/30 transition"
               >
                 + Escalation T3 Fornitore
               </button>
               <button
                 type="button"
                 onClick={() => handleQuickReason('Rilevata anomalia sull’impianto elettrico/ventilazione di competenza Facility')}
-                className="rounded-lg bg-slate-800/80 hover:bg-slate-700 px-2 py-1 text-[10px] text-emerald-300 border border-emerald-500/30 transition"
+                className="rounded-lg bg-[#0E1F4B] hover:bg-[#152B66] px-2 py-1 text-[10px] text-blue-200 border border-[#1A3166] transition"
               >
                 + Passaggio a Facility
               </button>
               <button
                 type="button"
                 onClick={() => handleQuickReason('Blocco software/rete richiedente verifica switch o server centrale')}
-                className="rounded-lg bg-slate-800/80 hover:bg-slate-700 px-2 py-1 text-[10px] text-blue-300 border border-blue-500/30 transition"
+                className="rounded-lg bg-[#0E1F4B] hover:bg-[#152B66] px-2 py-1 text-[10px] text-blue-200 border border-[#1A3166] transition"
               >
                 + Passaggio a IT (Piccirilli)
               </button>
               <button
                 type="button"
                 onClick={() => handleQuickReason('Problema hardware specifico su scheda gioco/cambiamonete')}
-                className="rounded-lg bg-slate-800/80 hover:bg-slate-700 px-2 py-1 text-[10px] text-amber-300 border border-amber-500/30 transition"
+                className="rounded-lg bg-[#0E1F4B] hover:bg-[#152B66] px-2 py-1 text-[10px] text-[#F3C64F] border border-[#D4AF37]/40 transition"
               >
                 + Passaggio a Gaming (Benin)
               </button>
@@ -227,7 +227,7 @@ export const TransferTicketModal: React.FC<TransferTicketModalProps> = ({
 
           {/* Reason Text Area */}
           <div className="space-y-1.5">
-            <label className="font-bold text-slate-300 block">
+            <label className="font-bold text-blue-200 block">
               2. Motivo del Trasferimento:
             </label>
             <textarea
@@ -236,13 +236,13 @@ export const TransferTicketModal: React.FC<TransferTicketModalProps> = ({
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               placeholder="Spiega chiaramente al collega cosa hai riscontrato e perché il ticket viene trasferito al suo livello..."
-              className="w-full rounded-xl border border-slate-700 bg-slate-950/80 p-3 text-xs text-white placeholder-slate-500 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+              className="w-full rounded-xl border border-[#1A3166] bg-[#070F24] p-3 text-xs text-white placeholder-blue-300/40 focus:border-[#D4AF37] focus:outline-none focus:ring-1 focus:ring-[#D4AF37]"
             />
           </div>
 
           {/* Action buttons */}
-          <div className="flex items-center justify-between pt-3 border-t border-slate-800">
-            <div className="text-[11px] text-slate-400">
+          <div className="flex items-center justify-between pt-3 border-t border-[#1A3166]">
+            <div className="text-[11px] text-blue-300/70">
               Mittente: <strong className="text-white">{currentUser.displayName}</strong>
             </div>
 
@@ -250,14 +250,14 @@ export const TransferTicketModal: React.FC<TransferTicketModalProps> = ({
               <button
                 type="button"
                 onClick={onClose}
-                className="rounded-xl border border-slate-700 px-4 py-2 text-xs font-semibold text-slate-300 hover:bg-slate-800 transition"
+                className="rounded-xl border border-[#1A3166] px-4 py-2 text-xs font-semibold text-blue-300 hover:bg-[#0E1F4B] transition"
               >
                 Annulla
               </button>
               <button
                 type="submit"
                 disabled={isSubmitting || !reason.trim()}
-                className="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 px-4 py-2 text-xs font-bold text-white shadow-md shadow-cyan-900/40 hover:from-cyan-500 hover:to-blue-500 transition disabled:opacity-50"
+                className="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-[#D4AF37] via-[#F3C64F] to-[#D4AF37] hover:brightness-110 px-4 py-2 text-xs font-bold text-[#070F26] shadow-md shadow-[#D4AF37]/20 transition disabled:opacity-50"
               >
                 <Send className="h-3.5 w-3.5" />
                 <span>{isSubmitting ? 'Trasferimento in corso...' : 'Conferma e Invia Notifica'}</span>

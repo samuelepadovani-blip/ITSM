@@ -67,10 +67,10 @@ export const TicketBoardView: React.FC<TicketBoardViewProps> = ({
     <div className="max-w-6xl mx-auto space-y-6 pb-12">
       {/* Metric Cards Bar */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-        <div className="rounded-xl border border-slate-800 bg-slate-900/80 p-4 shadow-sm">
-          <span className="text-xs text-slate-400 font-medium">Totale Ticket</span>
+        <div className="rounded-xl border border-[#1A3166] bg-[#0A1636]/90 p-4 shadow-sm">
+          <span className="text-xs text-blue-300/70 font-medium">Totale Ticket</span>
           <div className="text-2xl font-black text-white font-mono mt-1">{totalCount}</div>
-          <span className="text-[11px] text-cyan-400">Tutti i reparti</span>
+          <span className="text-[11px] text-[#F3C64F]">Tutti i reparti</span>
         </div>
 
         <div className="rounded-xl border border-red-500/30 bg-red-950/20 p-4 shadow-sm">
@@ -91,13 +91,13 @@ export const TicketBoardView: React.FC<TicketBoardViewProps> = ({
           <span className="text-[11px] text-purple-400">Coord. Piccirilli</span>
         </div>
 
-        <div className="rounded-xl border border-amber-500/30 bg-amber-950/20 p-4 shadow-sm">
+        <div className="rounded-xl border border-[#D4AF37]/30 bg-[#0E1F4B]/60 p-4 shadow-sm">
           <div className="flex items-center justify-between">
-            <span className="text-xs text-amber-300 font-medium">Attivi in Coda</span>
-            <Clock className="h-4 w-4 text-amber-400" />
+            <span className="text-xs text-[#F3C64F] font-medium">Attivi in Coda</span>
+            <Clock className="h-4 w-4 text-[#D4AF37]" />
           </div>
-          <div className="text-2xl font-black text-amber-400 font-mono mt-1">{openCount}</div>
-          <span className="text-[11px] text-amber-300/80">Aperti / In corso</span>
+          <div className="text-2xl font-black text-white font-mono mt-1">{openCount}</div>
+          <span className="text-[11px] text-blue-200">Aperti / In corso</span>
         </div>
 
         <div className="rounded-xl border border-emerald-500/30 bg-emerald-950/20 p-4 shadow-sm">
@@ -111,31 +111,31 @@ export const TicketBoardView: React.FC<TicketBoardViewProps> = ({
       </div>
 
       {/* Filter and Search Toolbar */}
-      <div className="rounded-xl border border-slate-800 bg-slate-900/90 p-4 shadow-lg space-y-3">
+      <div className="rounded-xl border border-[#1A3166] bg-[#0A1636]/90 p-4 shadow-lg space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="relative flex-1 min-w-[240px]">
-            <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-500" />
+            <Search className="absolute left-3 top-2.5 h-4 w-4 text-blue-400/50" />
             <input
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Cerca per ID ticket, asset, problema o tecnico..."
-              className="w-full rounded-lg border border-slate-800 bg-slate-950 pl-9 pr-4 py-2 text-xs text-slate-200 placeholder-slate-500 focus:border-cyan-500 focus:outline-none"
+              className="w-full rounded-lg border border-[#1A3166] bg-[#070F24] pl-9 pr-4 py-2 text-xs text-blue-100 placeholder-blue-400/40 focus:border-[#D4AF37] focus:outline-none"
             />
           </div>
 
           <button
             onClick={handleExportJSON}
-            className="flex items-center gap-1.5 rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-xs font-semibold text-slate-200 hover:bg-slate-700 transition"
+            className="flex items-center gap-1.5 rounded-lg border border-[#1A3166] bg-[#0E1F4B] px-3 py-2 text-xs font-semibold text-blue-200 hover:border-[#D4AF37]/40 hover:text-white transition"
           >
             <Download className="h-3.5 w-3.5" />
             <span>Esporta Registro JSON</span>
           </button>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-800/80 text-xs">
-          <div className="flex items-center gap-1.5 text-slate-400 mr-2">
-            <Filter className="h-3.5 w-3.5" />
+        <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-[#1A3166] text-xs">
+          <div className="flex items-center gap-1.5 text-blue-300/70 mr-2">
+            <Filter className="h-3.5 w-3.5 text-[#D4AF37]" />
             <span className="font-semibold">Filtri:</span>
           </div>
 
@@ -144,7 +144,7 @@ export const TicketBoardView: React.FC<TicketBoardViewProps> = ({
             value={filterCategory}
             onChange={(e) => setFilterCategory(e.target.value)}
             aria-label="Filtra per categoria"
-            className="rounded-lg border border-slate-800 bg-slate-950 px-2.5 py-1.5 text-slate-300 focus:outline-none"
+            className="rounded-lg border border-[#1A3166] bg-[#070F24] px-2.5 py-1.5 text-blue-200 focus:border-[#D4AF37] focus:outline-none"
           >
             <option value="Tutte">Tutte le Categorie</option>
             <option value="IT">IT & Rete</option>
@@ -158,7 +158,7 @@ export const TicketBoardView: React.FC<TicketBoardViewProps> = ({
             value={filterPriority}
             onChange={(e) => setFilterPriority(e.target.value)}
             aria-label="Filtra per priorità"
-            className="rounded-lg border border-slate-800 bg-slate-950 px-2.5 py-1.5 text-slate-300 focus:outline-none"
+            className="rounded-lg border border-[#1A3166] bg-[#070F24] px-2.5 py-1.5 text-blue-200 focus:border-[#D4AF37] focus:outline-none"
           >
             <option value="Tutte">Tutte le Priorità</option>
             <option value="P1">P1 - Critico</option>
@@ -172,7 +172,7 @@ export const TicketBoardView: React.FC<TicketBoardViewProps> = ({
             value={filterTechnician}
             onChange={(e) => setFilterTechnician(e.target.value)}
             aria-label="Filtra per tecnico"
-            className="rounded-lg border border-slate-800 bg-slate-950 px-2.5 py-1.5 text-slate-300 focus:outline-none"
+            className="rounded-lg border border-[#1A3166] bg-[#070F24] px-2.5 py-1.5 text-blue-200 focus:border-[#D4AF37] focus:outline-none"
           >
             <option value="Tutti">Tutti i Tecnici</option>
             <option value="Piccirilli">Piccirilli (T1 / IT & T3 Coord)</option>
@@ -187,7 +187,7 @@ export const TicketBoardView: React.FC<TicketBoardViewProps> = ({
               type="checkbox"
               checked={filterT3Only}
               onChange={(e) => setFilterT3Only(e.target.checked)}
-              className="rounded border-slate-700 bg-slate-900 text-purple-500 focus:ring-0"
+              className="rounded border-[#1A3166] bg-[#070F24] text-purple-500 focus:ring-0"
             />
             <span className="font-semibold">Solo Escalation T3 (Fornitori Esterni)</span>
           </label>
@@ -196,15 +196,15 @@ export const TicketBoardView: React.FC<TicketBoardViewProps> = ({
 
       {/* Ticket List */}
       <div className="space-y-4">
-        <div className="flex items-center justify-between text-xs text-slate-400 px-1">
+        <div className="flex items-center justify-between text-xs text-blue-300/70 px-1">
           <span>Risultati: {filteredTickets.length} ticket visualizzati</span>
           <span>Ordinati dal più recente</span>
         </div>
 
         {filteredTickets.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-slate-800 p-12 text-center text-slate-500 space-y-2">
-            <AlertCircle className="h-8 w-8 mx-auto text-slate-600" />
-            <p className="text-sm font-semibold text-slate-400">Nessun ticket trovato con i filtri selezionati.</p>
+          <div className="rounded-xl border border-dashed border-[#1A3166] p-12 text-center text-blue-400/50 space-y-2">
+            <AlertCircle className="h-8 w-8 mx-auto text-blue-400/40" />
+            <p className="text-sm font-semibold text-blue-300/80">Nessun ticket trovato con i filtri selezionati.</p>
             <p className="text-xs">Prova a modificare i criteri di ricerca o crea una nuova segnalazione nella chat.</p>
           </div>
         ) : (

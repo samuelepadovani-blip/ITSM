@@ -196,47 +196,47 @@ export const UserReportPortal: React.FC<UserReportPortalProps> = ({
   return (
     <div className="max-w-4xl mx-auto space-y-6 pb-12">
       {/* Top Banner */}
-      <div className="rounded-2xl border border-slate-800 bg-gradient-to-r from-slate-900 via-slate-900 to-cyan-950/40 p-6 shadow-xl space-y-3">
+      <div className="rounded-2xl border border-[#1A3166] bg-[#0A1636] p-6 shadow-xl space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="inline-flex items-center gap-2 rounded-full border border-cyan-500/30 bg-cyan-500/10 px-3 py-1 text-xs font-semibold text-cyan-400">
-            <Sparkles className="h-3.5 w-3.5" />
+          <div className="inline-flex items-center gap-2 rounded-full border border-[#D4AF37]/30 bg-[#D4AF37]/10 px-3 py-1 text-xs font-semibold text-[#F3C64F]">
+            <Sparkles className="h-3.5 w-3.5 text-[#D4AF37]" />
             <span>Portale Segnalazione Disservizi Centro Operativo</span>
           </div>
 
           {currentUser && onLogout && (
             <button
               onClick={onLogout}
-              className="flex items-center gap-1.5 rounded-xl border border-slate-700 bg-slate-800/80 px-3 py-1.5 text-xs text-slate-200 hover:bg-red-950/40 hover:border-red-500/40 hover:text-red-300 transition"
+              className="flex items-center gap-1.5 rounded-xl border border-[#1A3166] bg-[#0E1F4B] px-3 py-1.5 text-xs text-blue-200 hover:bg-red-950/40 hover:border-red-500/40 hover:text-red-300 transition"
             >
-              <Users className="h-3.5 w-3.5 text-cyan-400" />
+              <Users className="h-3.5 w-3.5 text-[#D4AF37]" />
               <span>Connesso: <strong>{currentUser.displayName}</strong> (Logout)</span>
             </button>
           )}
         </div>
 
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-[#F3C64F] tracking-tight">
           Segnala un Guasto o Disservizio
         </h1>
-        <p className="text-xs sm:text-sm text-slate-300 leading-relaxed max-w-2xl">
+        <p className="text-xs sm:text-sm text-blue-100/90 leading-relaxed max-w-2xl">
           Descrivi l'anomalia riscontrata su qualsiasi asset (Slot, Impianto Audio/Luci, Rete/POS, Macchinette Caffè, ecc.). Il sistema analizzerà la richiesta e assegnerà istantaneamente il ticket al tecnico competente (Piccirilli, Benin, Padovani o Ayoub) notificandolo in tempo reale.
         </p>
       </div>
 
       {/* Confirmation Card after Ticket Creation */}
       {createdTicket && (
-        <div className="rounded-2xl border border-emerald-500/50 bg-slate-900/95 p-6 shadow-2xl space-y-4 animate-in fade-in slide-in-from-top-4 duration-300 ring-1 ring-emerald-500/30">
+        <div className="rounded-2xl border border-[#D4AF37]/50 bg-[#0A1636]/95 p-6 shadow-2xl space-y-4 animate-in fade-in slide-in-from-top-4 duration-300 ring-1 ring-[#D4AF37]/20">
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#D4AF37]/15 text-[#F3C64F] border border-[#D4AF37]/30">
                 <CheckCircle2 className="h-6 w-6" />
               </div>
               <div>
-                <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider block">
+                <span className="text-xs font-bold text-[#F3C64F] uppercase tracking-wider block">
                   Segnalazione Inviata con Successo
                 </span>
                 <h3 className="text-lg font-bold text-white flex items-center gap-2">
                   <span>Ticket Creato:</span>
-                  <span className="font-mono text-cyan-300">#{createdTicket.ticketId}</span>
+                  <span className="font-mono text-[#F3C64F]">#{createdTicket.ticketId}</span>
                 </h3>
               </div>
             </div>
@@ -245,35 +245,35 @@ export const UserReportPortal: React.FC<UserReportPortalProps> = ({
               createdTicket.priority === 'P1'
                 ? 'bg-red-500/20 text-red-300 border-red-500/40'
                 : createdTicket.priority === 'P2'
-                ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
-                : 'bg-blue-500/20 text-blue-300 border-blue-500/40'
+                ? 'bg-[#D4AF37]/15 text-[#F3C64F] border-[#D4AF37]/40'
+                : 'bg-[#0E1F4B] text-blue-200 border-[#1E3975]'
             }`}>
               {createdTicket.priority} • {createdTicket.sla.split('-')[0]}
             </span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 p-3.5 rounded-xl bg-slate-950/70 border border-slate-800 text-xs">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 p-3.5 rounded-xl bg-[#070F24]/80 border border-[#1A3166] text-xs">
             <div>
-              <span className="text-slate-400 block text-[11px]">Asset Rilevato:</span>
+              <span className="text-blue-300/70 block text-[11px]">Asset Rilevato:</span>
               <strong className="text-white font-medium">{createdTicket.asset}</strong>
             </div>
             <div>
-              <span className="text-slate-400 block text-[11px]">Reparto / Categoria:</span>
-              <strong className="text-cyan-300 font-medium">{createdTicket.category}</strong>
+              <span className="text-blue-300/70 block text-[11px]">Reparto / Categoria:</span>
+              <strong className="text-[#F3C64F] font-medium">{createdTicket.category}</strong>
             </div>
             <div>
-              <span className="text-slate-400 block text-[11px]">Tecnico Assegnatario:</span>
-              <strong className="text-emerald-400 font-medium">{createdTicket.assignedTo}</strong>
+              <span className="text-blue-300/70 block text-[11px]">Tecnico Assegnatario:</span>
+              <strong className="text-white font-medium">{createdTicket.assignedTo}</strong>
             </div>
             <div>
-              <span className="text-slate-400 block text-[11px]">Livello Supporto:</span>
+              <span className="text-blue-300/70 block text-[11px]">Livello Supporto:</span>
               <strong className="text-purple-300 font-medium font-mono">{createdTicket.assignedLevel}</strong>
             </div>
           </div>
 
-          <div className="p-3 rounded-xl bg-slate-950/50 border border-slate-800 text-xs text-slate-300 space-y-1">
-            <div className="font-semibold text-slate-200">Azione Operativa Programmata:</div>
-            <p className="text-slate-400 text-xs">{createdTicket.actionRequired}</p>
+          <div className="p-3 rounded-xl bg-[#070F24]/50 border border-[#1A3166] text-xs text-blue-200 space-y-1">
+            <div className="font-semibold text-blue-100">Azione Operativa Programmata:</div>
+            <p className="text-blue-300/80 text-xs">{createdTicket.actionRequired}</p>
           </div>
 
           {createdTicket.escalationT3 && (
@@ -288,7 +288,7 @@ export const UserReportPortal: React.FC<UserReportPortalProps> = ({
           <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
             <button
               onClick={() => setCreatedTicket(null)}
-              className="rounded-xl border border-slate-700 bg-slate-800 px-4 py-2 text-xs font-semibold text-slate-200 hover:bg-slate-700 transition"
+              className="rounded-xl border border-[#1A3166] bg-[#0E1F4B] px-4 py-2 text-xs font-semibold text-blue-200 hover:bg-[#152B66] hover:text-white transition"
             >
               Invia un'altra segnalazione
             </button>
@@ -297,17 +297,17 @@ export const UserReportPortal: React.FC<UserReportPortalProps> = ({
               {onAskAI && (
                 <button
                   onClick={() => onAskAI(createdTicket)}
-                  className="flex items-center gap-1.5 rounded-xl border border-indigo-500/50 bg-indigo-950/50 px-4 py-2 text-xs font-bold text-indigo-300 hover:bg-indigo-900/60 hover:border-indigo-400 transition shadow-sm"
+                  className="flex items-center gap-1.5 rounded-xl border border-[#D4AF37]/40 bg-[#D4AF37]/10 px-4 py-2 text-xs font-bold text-[#F3C64F] hover:bg-[#D4AF37]/20 hover:border-[#D4AF37]/60 transition shadow-sm"
                   title="Inoltra la richiesta all'Assistente AI per approfondimenti e istruzioni immediate"
                 >
-                  <Sparkles className="h-3.5 w-3.5 text-indigo-400" />
+                  <Sparkles className="h-3.5 w-3.5 text-[#D4AF37]" />
                   <span>Chiedi all'Assistente AI</span>
                 </button>
               )}
 
               <button
                 onClick={() => onNavigateToInbox(createdTicket.assignedTechnicianId)}
-                className="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 px-4 py-2 text-xs font-bold text-white shadow-md shadow-cyan-900/30 hover:opacity-95 transition"
+                className="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-[#D4AF37] via-[#F3C64F] to-[#D4AF37] hover:brightness-110 px-4 py-2 text-xs font-bold text-[#070F26] shadow-md shadow-[#D4AF37]/20 transition"
               >
                 <span>Vedi Arrivo nella Postazione di {createdTicket.assignedTo}</span>
                 <ArrowRight className="h-3.5 w-3.5" />
@@ -319,14 +319,14 @@ export const UserReportPortal: React.FC<UserReportPortalProps> = ({
 
       {/* Main Form Box */}
       {!createdTicket && (
-        <div className="rounded-2xl border border-slate-800 bg-slate-900/80 p-5 sm:p-7 shadow-xl space-y-6">
+        <div className="rounded-2xl border border-[#1A3166] bg-[#0A1636]/80 p-5 sm:p-7 shadow-xl space-y-6">
           {/* Fast Test Presets */}
           <div className="space-y-2.5">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+              <span className="text-xs font-bold text-blue-200 uppercase tracking-wider flex items-center gap-1.5">
                 <span>Scenari di Prova Rapida:</span>
               </span>
-              <span className="text-[11px] text-slate-500 hidden sm:inline">
+              <span className="text-[11px] text-blue-300/60 hidden sm:inline">
                 Clicca per autocompilare e testare l'instradamento ai diversi tecnici
               </span>
             </div>
@@ -339,12 +339,12 @@ export const UserReportPortal: React.FC<UserReportPortalProps> = ({
                     key={idx}
                     type="button"
                     onClick={() => applyPreset(preset)}
-                    className={`flex items-start gap-2.5 rounded-xl border p-2.5 text-left transition bg-slate-950/60 ${preset.color}`}
+                    className={`flex items-start gap-2.5 rounded-xl border p-2.5 text-left transition bg-[#070F24]/80 ${preset.color}`}
                   >
                     <IconComp className="h-4 w-4 shrink-0 mt-0.5" />
                     <div className="min-w-0">
                       <div className="font-bold text-xs truncate">{preset.title}</div>
-                      <div className="text-[10px] text-slate-400 truncate">
+                      <div className="text-[10px] text-blue-300/70 truncate">
                         Destinatario: {preset.target}
                       </div>
                     </div>
@@ -354,15 +354,15 @@ export const UserReportPortal: React.FC<UserReportPortalProps> = ({
             </div>
           </div>
 
-          <hr className="border-slate-800" />
+          <hr className="border-[#1A3166]" />
 
           {/* User Input Form */}
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* Reporter Name */}
               <div className="space-y-1.5">
-                <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-300">
-                  <User className="h-3.5 w-3.5 text-cyan-400" />
+                <label className="flex items-center gap-1.5 text-xs font-semibold text-blue-200">
+                  <User className="h-3.5 w-3.5 text-[#D4AF37]" />
                   <span>Nome Segnalatore o Ruolo *</span>
                 </label>
                 <input
@@ -371,14 +371,14 @@ export const UserReportPortal: React.FC<UserReportPortalProps> = ({
                   value={reporterName}
                   onChange={(e) => setReporterName(e.target.value)}
                   placeholder="Es. Marco (Sala Slot), Laura (Bar)..."
-                  className="w-full rounded-xl border border-slate-800 bg-slate-950 px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:border-cyan-500 focus:outline-none"
+                  className="w-full rounded-xl border border-[#1A3166] bg-[#070F24] px-3.5 py-2.5 text-xs text-white placeholder-blue-300/40 focus:border-[#D4AF37] focus:outline-none focus:ring-1 focus:ring-[#D4AF37]/40"
                 />
               </div>
 
               {/* Location / Zone */}
               <div className="space-y-1.5">
-                <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-300">
-                  <MapPin className="h-3.5 w-3.5 text-cyan-400" />
+                <label className="flex items-center gap-1.5 text-xs font-semibold text-blue-200">
+                  <MapPin className="h-3.5 w-3.5 text-[#D4AF37]" />
                   <span>Ubicazione / Postazione *</span>
                 </label>
                 <input
@@ -387,19 +387,19 @@ export const UserReportPortal: React.FC<UserReportPortalProps> = ({
                   value={reporterZone}
                   onChange={(e) => setReporterZone(e.target.value)}
                   placeholder="Es. Sala Nord - Slot 14, Bancone Bar, ecc."
-                  className="w-full rounded-xl border border-slate-800 bg-slate-950 px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:border-cyan-500 focus:outline-none"
+                  className="w-full rounded-xl border border-[#1A3166] bg-[#070F24] px-3.5 py-2.5 text-xs text-white placeholder-blue-300/40 focus:border-[#D4AF37] focus:outline-none focus:ring-1 focus:ring-[#D4AF37]/40"
                 />
               </div>
             </div>
 
             {/* Problem Description (Core field requested by prof) */}
             <div className="space-y-1.5">
-              <label className="flex items-center justify-between text-xs font-semibold text-slate-300">
+              <label className="flex items-center justify-between text-xs font-semibold text-blue-200">
                 <div className="flex items-center gap-1.5">
-                  <Wrench className="h-3.5 w-3.5 text-cyan-400" />
+                  <Wrench className="h-3.5 w-3.5 text-[#D4AF37]" />
                   <span>Descrizione del problema o anomalia *</span>
                 </div>
-                <span className="text-[11px] text-slate-500 font-normal">
+                <span className="text-[11px] text-blue-300/60 font-normal">
                   Scrivi in linguaggio naturale
                 </span>
               </label>
@@ -409,13 +409,13 @@ export const UserReportPortal: React.FC<UserReportPortalProps> = ({
                 value={userMessage}
                 onChange={(e) => setUserMessage(e.target.value)}
                 placeholder="Scrivi qui cosa è successo... (Es. La slot 14 si è spenta all'improvviso, fuma la scheda madre e serve il fornitore in garanzia; oppure: Il tostapane fa scattare il salvavita del bar...)"
-                className="w-full rounded-xl border border-slate-800 bg-slate-950 p-3.5 text-xs text-white placeholder-slate-500 focus:border-cyan-500 focus:outline-none leading-relaxed resize-none"
+                className="w-full rounded-xl border border-[#1A3166] bg-[#070F24] p-3.5 text-xs text-white placeholder-blue-300/40 focus:border-[#D4AF37] focus:outline-none focus:ring-1 focus:ring-[#D4AF37]/40 leading-relaxed resize-none"
               />
             </div>
 
             {/* Urgency Level selection */}
             <div className="space-y-1.5">
-              <label className="block text-xs font-semibold text-slate-300">
+              <label className="block text-xs font-semibold text-blue-200">
                 Gravità percepita dall'utente:
               </label>
               <div className="grid grid-cols-3 gap-2">
@@ -429,9 +429,9 @@ export const UserReportPortal: React.FC<UserReportPortalProps> = ({
                         ? lvl === 'Critico'
                           ? 'bg-red-500/20 border-red-500 text-red-300 font-bold'
                           : lvl === 'Urgente'
-                          ? 'bg-amber-500/20 border-amber-500 text-amber-300 font-bold'
-                          : 'bg-cyan-500/20 border-cyan-500 text-cyan-300 font-bold'
-                        : 'bg-slate-950 border-slate-800 text-slate-400 hover:bg-slate-800'
+                          ? 'bg-[#D4AF37]/20 border-[#D4AF37] text-[#F3C64F] font-bold'
+                          : 'bg-[#0E1F4B] border-blue-400 text-blue-100 font-bold'
+                        : 'bg-[#070F24] border-[#1A3166] text-blue-200/60 hover:bg-[#0C1A3D]'
                     }`}
                   >
                     {lvl === 'Critico' ? '🔴 Critico (Fermo Sala)' : lvl === 'Urgente' ? '🟡 Urgente' : '🟢 Normale'}
@@ -452,16 +452,16 @@ export const UserReportPortal: React.FC<UserReportPortalProps> = ({
               id="submit-ticket-btn"
               type="submit"
               disabled={isSubmitting || !userMessage.trim()}
-              className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 py-3 text-sm font-bold text-white shadow-lg shadow-cyan-900/30 hover:opacity-95 disabled:opacity-50 disabled:cursor-not-allowed transition"
+              className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#D4AF37] via-[#F3C64F] to-[#D4AF37] hover:brightness-110 py-3 text-sm font-bold text-[#070F26] shadow-lg shadow-[#D4AF37]/20 disabled:opacity-50 disabled:cursor-not-allowed transition"
             >
               {isSubmitting ? (
                 <>
-                  <RefreshCw className="h-4 w-4 animate-spin" />
+                  <RefreshCw className="h-4 w-4 animate-spin text-[#070F26]" />
                   <span>Analisi ITSM e Instradamento al Tecnico in corso...</span>
                 </>
               ) : (
                 <>
-                  <Send className="h-4 w-4" />
+                  <Send className="h-4 w-4 text-[#070F26] stroke-[2.5]" />
                   <span>Invia Segnalazione e Notifica Tecnico Competente</span>
                 </>
               )}
@@ -472,54 +472,54 @@ export const UserReportPortal: React.FC<UserReportPortalProps> = ({
 
       {/* Tracked Tickets by Reporter */}
       {userTickets.length > 0 && (
-        <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-5 space-y-4">
+        <div className="rounded-2xl border border-[#1A3166] bg-[#0A1636]/60 p-5 space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-bold text-white flex items-center gap-2">
-              <Clock className="h-4 w-4 text-cyan-400" />
+              <Clock className="h-4 w-4 text-[#D4AF37]" />
               <span>Stato delle Tue Segnalazioni Recenti ({userTickets.length})</span>
             </h3>
-            <span className="text-[11px] text-slate-500">Aggiornato in tempo reale</span>
+            <span className="text-[11px] text-blue-300/60">Aggiornato in tempo reale</span>
           </div>
 
           <div className="space-y-2.5">
             {userTickets.map((t) => (
               <div
                 key={t.ticketId}
-                className="rounded-xl border border-slate-800 bg-slate-950/70 p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
+                className="rounded-xl border border-[#15254A] bg-[#070F24]/80 p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
               >
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
                     <span className="font-mono font-bold text-white">#{t.ticketId}</span>
-                    <span className="font-semibold text-cyan-300">{t.asset}</span>
+                    <span className="font-semibold text-[#F3C64F]">{t.asset}</span>
                     <span className={`px-2 py-0.5 rounded text-[10px] font-semibold border ${
                       t.status === 'Risolto'
                         ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
                         : t.status === 'In Lavorazione'
-                        ? 'bg-blue-500/20 text-blue-300 border-blue-500/30'
-                        : 'bg-amber-500/20 text-amber-300 border-amber-500/30'
+                        ? 'bg-[#D4AF37]/15 text-[#F3C64F] border-[#D4AF37]/40'
+                        : 'bg-[#0E1F4B] text-blue-200 border-[#1E3975]'
                     }`}>
                       {t.status}
                     </span>
                     {t.lastTransfer && (
-                      <span className="inline-flex items-center gap-1 text-[10px] text-amber-400 bg-amber-950/40 border border-amber-500/30 px-1.5 py-0.2 rounded">
+                      <span className="inline-flex items-center gap-1 text-[10px] text-[#F3C64F] bg-[#0A1636] border border-[#D4AF37]/40 px-1.5 py-0.2 rounded">
                         <ArrowRightLeft className="h-3 w-3" />
                         Spostato a {t.assignedTo}
                       </span>
                     )}
                   </div>
-                  <p className="text-slate-400 text-xs line-clamp-1">"{t.userMessage}"</p>
+                  <p className="text-blue-200/80 text-xs line-clamp-1">"{t.userMessage}"</p>
                 </div>
 
-                <div className="flex items-center gap-3 shrink-0 text-slate-400 text-[11px]">
+                <div className="flex items-center gap-3 shrink-0 text-blue-300/70 text-[11px]">
                   <span>Preso in carico da: <strong className="text-white">{t.assignedTo}</strong></span>
-                  <span className="font-mono text-slate-500">{t.timestamp}</span>
+                  <span className="font-mono text-blue-400/60">{t.timestamp}</span>
                   {onAskAI && (
                     <button
                       onClick={() => onAskAI(t)}
-                      className="flex items-center gap-1 rounded-lg border border-indigo-500/30 bg-indigo-950/30 px-2.5 py-1 text-[11px] font-semibold text-indigo-300 hover:bg-indigo-900/40 hover:text-indigo-200 transition"
+                      className="flex items-center gap-1 rounded-lg border border-[#D4AF37]/40 bg-[#D4AF37]/10 px-2.5 py-1 text-[11px] font-semibold text-[#F3C64F] hover:bg-[#D4AF37]/20 transition"
                       title="Chiedi supporto all'Assistente AI per questa segnalazione"
                     >
-                      <Sparkles className="h-3 w-3 text-indigo-400" />
+                      <Sparkles className="h-3 w-3 text-[#D4AF37]" />
                       <span>Chiedi all'AI</span>
                     </button>
                   )}

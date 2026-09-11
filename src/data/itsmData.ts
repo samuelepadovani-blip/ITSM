@@ -21,7 +21,7 @@ export const STAFF_MEMBERS: StaffMember[] = [
     assets: ['Slot', 'Cambio Cash', 'Bowling', 'Casse'],
     specialDuty: 'Manutenzione specialistica hardware gaming e gestione casse. Non chiama fornitori esterni (scala a Piccirilli).',
     canCallVendors: false,
-    avatarColor: 'from-amber-500 to-orange-600',
+    avatarColor: 'from-stone-600 to-stone-800',
   },
   {
     id: 'padovani',
@@ -243,10 +243,10 @@ export const SLA_DEFINITIONS: SLADefinition[] = [
     description: 'Disservizio grave con impatto operativo elevato su reparto o asset singolo critico.',
     responseTime: '< 30 minuti',
     resolutionTime: '< 4 ore',
-    color: 'amber',
-    badgeBg: 'bg-amber-500/10',
-    badgeBorder: 'border-amber-500/30',
-    badgeText: 'text-amber-400',
+    color: 'gold',
+    badgeBg: 'bg-[#D4AF37]/15',
+    badgeBorder: 'border-[#D4AF37]/50',
+    badgeText: 'text-[#F3C64F]',
     examples: [
       'Guasto a singola cassa primaria con coda clienti',
       'Blocco di una serie di Slot o pista Bowling principale',

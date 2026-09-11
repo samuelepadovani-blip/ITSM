@@ -53,7 +53,7 @@ export const USER_ACCOUNTS: UserAccount[] = [
     category: 'Gaming & Cassa',
     competencyDescription: 'Competenza esclusiva su Slot Machine (AWP/VLT), Macchine Cambio Cash, Gettoniere, Casse e Piste Bowling. Vede SOLO i propri ticket di reparto.',
     canCallVendors: false,
-    avatarColor: 'from-amber-500 to-orange-600',
+    avatarColor: 'from-amber-600 to-yellow-500',
     email: 'benin@centro.internal',
     password: 'demo',
     permissions: {

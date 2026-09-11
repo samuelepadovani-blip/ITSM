@@ -378,7 +378,7 @@ Prendi in carico il problema e forniscimi subito la serie completa di passaggi o
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-cyan-500/20 selection:text-cyan-300">
+    <div className="min-h-screen bg-[#060d1f] text-slate-100 flex flex-col font-sans selection:bg-[#D4AF37] selection:text-[#060d1f]">
       {/* Top Navbar with Account & Role Navigation */}
       <Navbar
         currentView={currentView}
@@ -412,8 +412,8 @@ Prendi in carico il problema e forniscimi subito la serie completa di passaggi o
 
       {/* Real-time Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-14 right-6 z-50 max-w-md rounded-2xl border border-cyan-500/50 bg-slate-900/95 px-4 py-3 shadow-2xl backdrop-blur flex items-center gap-3 text-xs text-cyan-300 animate-in fade-in slide-in-from-bottom-4 duration-300">
-          <Bell className="h-5 w-5 text-cyan-400 shrink-0 animate-bounce" />
+        <div className="fixed bottom-14 right-6 z-50 max-w-md rounded-2xl border border-[#D4AF37]/50 bg-[#0d1b3e]/95 px-4 py-3 shadow-2xl backdrop-blur flex items-center gap-3 text-xs text-[#F3C64F] ring-1 ring-[#D4AF37]/30 animate-in fade-in slide-in-from-bottom-4 duration-300">
+          <Bell className="h-5 w-5 text-[#D4AF37] shrink-0 animate-bounce" />
           <div className="flex-1">
             <span className="font-semibold block text-white">{toastMessage}</span>
           </div>
@@ -486,20 +486,20 @@ Prendi in carico il problema e forniscimi subito la serie completa di passaggi o
       </main>
 
       {/* Operational Footer Bar */}
-      <footer className="border-t border-slate-900 bg-slate-950/90 py-3 px-4 text-xs text-slate-500">
+      <footer className="border-t border-[#162752] bg-[#070f24]/95 py-3 px-4 text-xs text-blue-300/70">
         <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <span className="flex items-center gap-1.5 text-slate-400 font-medium">
+            <span className="flex items-center gap-1.5 text-blue-200/80 font-medium">
               <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
               Piattaforma ITSM Online • Profilo attivo: <strong className="text-white">{currentUser.displayName}</strong>
             </span>
-            <span className="text-slate-700 hidden sm:inline">•</span>
-            <span className="hidden sm:inline text-slate-400">
+            <span className="text-blue-900 hidden sm:inline">•</span>
+            <span className="hidden sm:inline text-blue-300/60">
               Segregazione Ruoli Attiva • Trasferimento Ticket Notificato
             </span>
           </div>
 
-          <div className="flex items-center gap-3 text-[11px] text-slate-400">
+          <div className="flex items-center gap-3 text-[11px] text-blue-300/70">
             <button
               onClick={handleLogout}
               className="hover:text-red-400 flex items-center gap-1 transition"
@@ -507,16 +507,16 @@ Prendi in carico il problema e forniscimi subito la serie completa di passaggi o
               <Users className="h-3 w-3" />
               <span>Disconnetti ({currentUser.displayName.split(' ')[0]})</span>
             </button>
-            <span className="text-slate-700">•</span>
+            <span className="text-blue-900">•</span>
             <button
               onClick={() => setIsOnlineModalOpen(true)}
-              className="hover:text-cyan-400 flex items-center gap-1 transition"
+              className="hover:text-[#F3C64F] flex items-center gap-1 transition"
             >
               <Globe className="h-3 w-3" />
               <span>Link Condivisione</span>
             </button>
-            <span className="text-slate-700">•</span>
-            <span className="font-mono text-slate-500">v3.0 Multi-Ruolo</span>
+            <span className="text-blue-900">•</span>
+            <span className="font-mono text-blue-400/60">v3.0 Multi-Ruolo</span>
           </div>
         </div>
       </footer>

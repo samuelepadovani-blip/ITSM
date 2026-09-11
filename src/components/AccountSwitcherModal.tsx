@@ -34,7 +34,7 @@ export const AccountSwitcherModal: React.FC<AccountSwitcherModalProps> = ({
   const getAccountIcon = (id: string) => {
     switch (id) {
       case 'benin':
-        return <Gamepad2 className="h-5 w-5 text-amber-400" />;
+        return <Gamepad2 className="h-5 w-5 text-[#F3C64F]" />;
       case 'padovani':
         return <Building2 className="h-5 w-5 text-emerald-400" />;
       case 'ayoub':
@@ -42,25 +42,25 @@ export const AccountSwitcherModal: React.FC<AccountSwitcherModalProps> = ({
       case 'piccirilli':
         return <Laptop className="h-5 w-5 text-blue-400" />;
       default:
-        return <Users className="h-5 w-5 text-slate-300" />;
+        return <Users className="h-5 w-5 text-blue-300" />;
     }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="w-full max-w-2xl rounded-2xl border border-slate-800 bg-slate-900 shadow-2xl p-5 sm:p-7 space-y-6 text-slate-100 ring-1 ring-white/10 max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200">
+      <div className="w-full max-w-2xl rounded-2xl border border-[#1A3166] bg-[#0A1636] shadow-2xl p-5 sm:p-7 space-y-6 text-blue-100 ring-1 ring-[#D4AF37]/20 max-h-[90vh] overflow-y-auto">
         
         {/* Header */}
-        <div className="flex items-start justify-between border-b border-slate-800 pb-4">
+        <div className="flex items-start justify-between border-b border-[#1A3166] pb-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-400">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#D4AF37]/10 border border-[#D4AF37]/30 text-[#D4AF37]">
               <Users className="h-6 w-6" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
+              <h2 className="text-xl font-bold text-[#F3C64F] tracking-tight flex items-center gap-2">
                 <span>Gestione Account & Ruoli ITSM</span>
               </h2>
-              <p className="text-xs text-slate-400 mt-0.5">
+              <p className="text-xs text-blue-300/70 mt-0.5">
                 Seleziona il profilo con cui accedere per testare la segregazione delle competenze e il trasferimento tra livelli.
               </p>
             </div>
@@ -68,20 +68,20 @@ export const AccountSwitcherModal: React.FC<AccountSwitcherModalProps> = ({
 
           <button
             onClick={onClose}
-            className="rounded-xl p-2 text-slate-400 hover:bg-slate-800 hover:text-white transition"
+            className="rounded-xl p-2 text-blue-300 hover:bg-[#0E1F4B] hover:text-white transition"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
         {/* Informative Note for Professors / Evaluators */}
-        <div className="rounded-xl border border-cyan-500/30 bg-cyan-950/20 p-3.5 flex items-start gap-3 text-xs text-cyan-300">
-          <Lock className="h-4 w-4 text-cyan-400 shrink-0 mt-0.5" />
+        <div className="rounded-xl border border-[#1A3166] bg-[#070F24] p-3.5 flex items-start gap-3 text-xs text-blue-200">
+          <Lock className="h-4 w-4 text-[#D4AF37] shrink-0 mt-0.5" />
           <div className="space-y-1 leading-relaxed">
             <strong className="text-white block font-semibold">
               Regola di Segregazione & Competenze Rigorose:
             </strong>
-            <p className="text-cyan-200/90 text-[11px]">
+            <p className="text-blue-300/80 text-[11px]">
               Ciascun account ha una vista limitata ai soli ticket di propria competenza. Ad esempio, <strong>Benin</strong> vede solo Gaming e non i ticket di Piccirilli o Padovani; <strong>Piccirilli</strong> gestisce IT e coordina le escalation T3 a fornitori esterni. Quando un ticket viene spostato ad un altro livello, il destinatario riceve una notifica immediata e il ticket appare nella sua dashboard!
             </p>
           </div>
@@ -89,7 +89,7 @@ export const AccountSwitcherModal: React.FC<AccountSwitcherModalProps> = ({
 
         {/* Accounts List */}
         <div className="space-y-2.5">
-          <label className="text-xs font-bold text-slate-300 uppercase tracking-wider block">
+          <label className="text-xs font-bold text-blue-200 uppercase tracking-wider block">
             Profili Disponibili (Cambio Sessione 1-Click):
           </label>
 
@@ -106,12 +106,12 @@ export const AccountSwitcherModal: React.FC<AccountSwitcherModalProps> = ({
                   }}
                   className={`group cursor-pointer rounded-xl border p-4 transition flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
                     isCurrent
-                      ? 'border-cyan-500 bg-cyan-950/40 ring-1 ring-cyan-500/50 shadow-md'
-                      : 'border-slate-800 bg-slate-950/60 hover:border-slate-700 hover:bg-slate-800/50'
+                      ? 'border-[#D4AF37] bg-[#0E1F4B] ring-1 ring-[#D4AF37]/40 shadow-lg shadow-[#D4AF37]/10'
+                      : 'border-[#1A3166] bg-[#070F24]/70 hover:border-[#D4AF37]/40 hover:bg-[#0E1F4B]/50'
                   }`}
                 >
                   <div className="flex items-start gap-3">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-800 border border-slate-700 mt-0.5">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#0A1636] border border-[#1A3166] mt-0.5">
                       {getAccountIcon(acc.id)}
                     </div>
                     <div className="space-y-1">
@@ -121,10 +121,10 @@ export const AccountSwitcherModal: React.FC<AccountSwitcherModalProps> = ({
                         </span>
                         <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${
                           acc.type === 'reporter' 
-                            ? 'bg-slate-800 border-slate-700 text-slate-300'
+                            ? 'bg-[#0A1636] border-[#1A3166] text-blue-300'
                             : acc.id === 'piccirilli'
-                            ? 'bg-blue-950/80 border-blue-600/50 text-blue-300'
-                            : 'bg-indigo-950/60 border-indigo-700/50 text-indigo-300'
+                            ? 'bg-purple-950/80 border-purple-600/50 text-purple-300'
+                            : 'bg-[#D4AF37]/15 border-[#D4AF37]/30 text-[#F3C64F]'
                         }`}>
                           {acc.role}
                         </span>
@@ -136,14 +136,14 @@ export const AccountSwitcherModal: React.FC<AccountSwitcherModalProps> = ({
                         )}
                       </div>
 
-                      <p className="text-xs text-slate-400 leading-snug">
+                      <p className="text-xs text-blue-300/70 leading-snug">
                         {acc.competencyDescription}
                       </p>
 
-                      <div className="flex items-center gap-3 text-[11px] text-slate-500 pt-0.5">
-                        <span>Reparto: <strong className="text-slate-300">{acc.category}</strong></span>
+                      <div className="flex items-center gap-3 text-[11px] text-blue-400/60 pt-0.5">
+                        <span>Reparto: <strong className="text-blue-200">{acc.category}</strong></span>
                         <span>•</span>
-                        <span>Livello: <strong className="text-cyan-400">{acc.level}</strong></span>
+                        <span>Livello: <strong className="text-[#F3C64F]">{acc.level}</strong></span>
                       </div>
                     </div>
                   </div>
@@ -151,10 +151,10 @@ export const AccountSwitcherModal: React.FC<AccountSwitcherModalProps> = ({
                   <div className="sm:shrink-0 flex items-center justify-end">
                     <button
                       type="button"
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition ${
+                      className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold transition ${
                         isCurrent
-                          ? 'bg-cyan-500 text-slate-950'
-                          : 'bg-slate-800 text-slate-300 group-hover:bg-cyan-600 group-hover:text-white'
+                          ? 'bg-gradient-to-r from-[#D4AF37] via-[#F3C64F] to-[#D4AF37] text-[#070F26] font-black shadow-md shadow-[#D4AF37]/20'
+                          : 'bg-[#0E1F4B] text-blue-200 border border-[#1A3166] group-hover:bg-gradient-to-r group-hover:from-[#D4AF37] group-hover:via-[#F3C64F] group-hover:to-[#D4AF37] group-hover:text-[#070F26]'
                       }`}
                     >
                       <span>{isCurrent ? 'In Uso' : 'Accedi'}</span>
@@ -168,11 +168,11 @@ export const AccountSwitcherModal: React.FC<AccountSwitcherModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between pt-2 border-t border-slate-800 text-xs text-slate-500">
+        <div className="flex items-center justify-between pt-2 border-t border-[#1A3166] text-xs text-blue-400/60">
           <span>Sistema di Controllo Accessi ITSM Centro Operativo</span>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-white font-medium"
+            className="text-blue-300 hover:text-white font-medium"
           >
             Chiudi
           </button>

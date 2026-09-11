@@ -134,7 +134,7 @@ export const TechnicianInboxView: React.FC<TechnicianInboxViewProps> = ({
   const getDepartmentIcon = (cat: string) => {
     switch (cat) {
       case 'Gaming & Cassa':
-        return <Gamepad2 className="h-5 w-5 text-amber-400" />;
+        return <Gamepad2 className="h-5 w-5 text-[#D4AF37]" />;
       case 'Facility & Sicurezza':
         return <Building2 className="h-5 w-5 text-emerald-400" />;
       case 'Food & Beverage':
@@ -147,22 +147,22 @@ export const TechnicianInboxView: React.FC<TechnicianInboxViewProps> = ({
   return (
     <div className="max-w-6xl mx-auto space-y-6 pb-12">
       {/* Top Banner: Account Identity & Competency Statement */}
-      <div className="rounded-2xl border border-slate-800 bg-gradient-to-r from-slate-900 via-slate-900 to-indigo-950/40 p-5 sm:p-6 shadow-xl space-y-4">
+      <div className="rounded-2xl border border-[#1A3166] bg-[#0A1636] p-5 sm:p-6 shadow-xl space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-start gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-800 border border-slate-700 shadow-md">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#0E1F4B] border border-[#1E3975] shadow-md">
               {getDepartmentIcon(currentUser.category)}
             </div>
             <div>
-              <div className="inline-flex items-center gap-2 rounded-full border border-cyan-500/30 bg-cyan-500/10 px-3 py-0.5 text-xs font-semibold text-cyan-400 mb-1">
+              <div className="inline-flex items-center gap-2 rounded-full border border-[#D4AF37]/30 bg-[#D4AF37]/10 px-3 py-0.5 text-xs font-semibold text-[#F3C64F] mb-1">
                 <Lock className="h-3 w-3" />
                 <span>Dashboard Personale con Segregazione Ruolo</span>
               </div>
-              <h1 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight flex items-center gap-2">
+              <h1 className="text-xl sm:text-2xl font-extrabold text-[#F3C64F] tracking-tight flex items-center gap-2">
                 <span>Postazione di {currentUser.displayName}</span>
               </h1>
-              <p className="text-xs sm:text-sm text-slate-400">
-                Ruolo: <strong className="text-slate-200">{currentUser.role}</strong> • Livello: <span className="text-cyan-400 font-mono">{currentUser.level}</span>
+              <p className="text-xs sm:text-sm text-blue-300/70">
+                Ruolo: <strong className="text-blue-100">{currentUser.role}</strong> • Livello: <span className="text-[#F3C64F] font-mono font-semibold">{currentUser.level}</span>
               </p>
             </div>
           </div>
@@ -177,17 +177,17 @@ export const TechnicianInboxView: React.FC<TechnicianInboxViewProps> = ({
               title={soundEnabled ? 'Disattiva avviso acustico' : 'Attiva avviso acustico arrivo ticket'}
               className={`flex items-center gap-2 rounded-xl px-3.5 py-2 text-xs font-semibold border transition ${
                 soundEnabled
-                  ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
-                  : 'bg-slate-800 text-slate-400 border-slate-700'
+                  ? 'bg-[#D4AF37]/15 text-[#F3C64F] border-[#D4AF37]/40'
+                  : 'bg-[#0E1F4B] text-blue-300 border-[#1A3166]'
               }`}
             >
-              {soundEnabled ? <Volume2 className="h-4 w-4 text-emerald-400" /> : <VolumeX className="h-4 w-4" />}
+              {soundEnabled ? <Volume2 className="h-4 w-4 text-[#D4AF37]" /> : <VolumeX className="h-4 w-4" />}
               <span>{soundEnabled ? 'Audio: Attivo' : 'Audio: Muto'}</span>
             </button>
 
             <button
               onClick={() => playNotificationChime('P1')}
-              className="rounded-xl border border-slate-800 bg-slate-950 px-2.5 py-2 text-[11px] text-slate-400 hover:text-white transition"
+              className="rounded-xl border border-[#1A3166] bg-[#070F24] px-2.5 py-2 text-[11px] text-blue-300 hover:text-white transition"
               title="Test audio"
             >
               Test
@@ -196,34 +196,34 @@ export const TechnicianInboxView: React.FC<TechnicianInboxViewProps> = ({
         </div>
 
         {/* Competency Isolation Notice */}
-        <div className="rounded-xl border border-slate-700/60 bg-slate-950/60 p-3.5 flex items-start justify-between gap-3 text-xs">
+        <div className="rounded-xl border border-[#1A3166] bg-[#070F24]/80 p-3.5 flex items-start justify-between gap-3 text-xs">
           <div className="flex items-start gap-2.5">
-            <UserCheck className="h-4 w-4 text-cyan-400 shrink-0 mt-0.5" />
+            <UserCheck className="h-4 w-4 text-[#D4AF37] shrink-0 mt-0.5" />
             <div className="space-y-0.5">
-              <span className="font-semibold text-slate-200 block">
+              <span className="font-semibold text-blue-100 block">
                 Ambito di Competenza Riservato:
               </span>
-              <p className="text-slate-400 text-[11px] leading-relaxed">
+              <p className="text-blue-300/70 text-[11px] leading-relaxed">
                 {currentUser.competencyDescription}
               </p>
             </div>
           </div>
 
           {currentUser.canCallVendors ? (
-            <span className="shrink-0 rounded-lg bg-purple-500/20 text-purple-300 border border-purple-500/40 px-2.5 py-1 font-semibold text-[10px] flex items-center gap-1">
+            <span className="shrink-0 rounded-lg bg-purple-950/60 text-purple-300 border border-purple-500/40 px-2.5 py-1 font-semibold text-[10px] flex items-center gap-1">
               <ShieldAlert className="h-3.5 w-3.5" />
               Abilitato T3 Fornitori
             </span>
           ) : (
-            <span className="shrink-0 rounded-lg bg-slate-800 text-slate-300 border border-slate-700 px-2.5 py-1 text-[10px]">
+            <span className="shrink-0 rounded-lg bg-[#0E1F4B] text-blue-200 border border-[#1E3975] px-2.5 py-1 text-[10px]">
               T2: Scala a Piccirilli per Fornitori
             </span>
           )}
         </div>
 
         {/* Authenticated Session & Security Boundary */}
-        <div className="pt-2 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-2 text-xs text-slate-300">
+        <div className="pt-2 border-t border-[#1A3166]/80 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2 text-xs text-blue-200">
             <ShieldCheck className="h-4 w-4 text-emerald-400 shrink-0" />
             <span>
               Sessione autenticata per <strong className="text-white">{currentUser.displayName}</strong> ({currentUser.role}). Visibilità rigorosamente segregata.
@@ -243,19 +243,19 @@ export const TechnicianInboxView: React.FC<TechnicianInboxViewProps> = ({
 
       {/* High-priority Transferred Alert Banner */}
       {transferredToMeCount > 0 && (
-        <div className="rounded-xl border border-amber-500/60 bg-gradient-to-r from-amber-950/40 via-slate-900 to-amber-950/30 p-4 shadow-lg flex items-center justify-between gap-4 animate-in fade-in slide-in-from-top-2 duration-300">
+        <div className="rounded-xl border border-[#D4AF37]/50 bg-[#0A1636] p-4 shadow-lg flex items-center justify-between gap-4 animate-in fade-in slide-in-from-top-2 duration-300">
           <div className="flex items-center gap-3">
-            <div className="h-3 w-3 rounded-full bg-amber-400 animate-ping"></div>
+            <div className="h-3 w-3 rounded-full bg-[#D4AF37] animate-ping"></div>
             <div>
-              <span className="text-xs font-bold text-amber-300 block">
+              <span className="text-xs font-bold text-[#F3C64F] block">
                 🔔 HAI {transferredToMeCount} TICKET TRASFERITI AL TUO LIVELLO
               </span>
-              <p className="text-xs text-slate-300">
+              <p className="text-xs text-blue-100">
                 Un collega ha spostato uno o più ticket alla tua competenza. Verifica i dettagli e la motivazione qui sotto.
               </p>
             </div>
           </div>
-          <span className="text-[11px] font-mono text-amber-300 bg-amber-500/20 px-2.5 py-1 rounded border border-amber-500/40">
+          <span className="text-[11px] font-mono text-[#F3C64F] bg-[#070F24] px-2.5 py-1 rounded border border-[#D4AF37]/40">
             Trasferiti a te
           </span>
         </div>
@@ -263,33 +263,33 @@ export const TechnicianInboxView: React.FC<TechnicianInboxViewProps> = ({
 
       {/* Real-time Incoming Alert Highlight */}
       {lastArrivedTicketId && (
-        <div className="rounded-xl border border-cyan-500/60 bg-gradient-to-r from-cyan-950/60 via-slate-900 to-indigo-950/60 p-4 shadow-lg flex items-center justify-between gap-4 animate-in fade-in slide-in-from-top-2 duration-300">
+        <div className="rounded-xl border border-[#D4AF37]/50 bg-[#0A1636] p-4 shadow-lg flex items-center justify-between gap-4 animate-in fade-in slide-in-from-top-2 duration-300">
           <div className="flex items-center gap-3">
-            <div className="h-3 w-3 rounded-full bg-cyan-400 animate-pulse"></div>
+            <div className="h-3 w-3 rounded-full bg-[#D4AF37] animate-pulse"></div>
             <div>
-              <span className="text-xs font-bold text-cyan-300 block">
+              <span className="text-xs font-bold text-[#F3C64F] block">
                 🔔 NUOVO TICKET RICEVUTO LIVE
               </span>
-              <p className="text-xs text-slate-300">
-                Il ticket <strong className="text-white font-mono">{lastArrivedTicketId}</strong> è attivo e sincronizzato sul server.
+              <p className="text-xs text-blue-100">
+                Il ticket <strong className="text-[#F3C64F] font-mono">{lastArrivedTicketId}</strong> è attivo e sincronizzato sul server.
               </p>
             </div>
           </div>
-          <span className="text-[11px] font-mono text-cyan-400 bg-cyan-500/10 px-2.5 py-1 rounded border border-cyan-500/30">
+          <span className="text-[11px] font-mono text-[#F3C64F] bg-[#070F24] px-2.5 py-1 rounded border border-[#D4AF37]/40">
             Sincronizzato
           </span>
         </div>
       )}
 
       {/* Tab bar */}
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-3">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#1A3166] pb-3">
         <div className="flex gap-2">
           <button
             onClick={() => setActiveTab('pending')}
             className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-semibold transition ${
               activeTab === 'pending'
-                ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40'
-                : 'bg-slate-900 text-slate-400 border border-slate-800 hover:text-white'
+                ? 'bg-gradient-to-r from-[#D4AF37] via-[#F3C64F] to-[#D4AF37] text-[#070F26] font-bold shadow-md shadow-[#D4AF37]/20 ring-1 ring-[#F5D880]'
+                : 'bg-[#0A1636] text-blue-200 border border-[#1A3166] hover:text-[#F3C64F]'
             }`}
           >
             <Clock className="h-3.5 w-3.5" />
@@ -300,8 +300,8 @@ export const TechnicianInboxView: React.FC<TechnicianInboxViewProps> = ({
             onClick={() => setActiveTab('resolved')}
             className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-semibold transition ${
               activeTab === 'resolved'
-                ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40'
-                : 'bg-slate-900 text-slate-400 border border-slate-800 hover:text-white'
+                ? 'bg-gradient-to-r from-[#D4AF37] via-[#F3C64F] to-[#D4AF37] text-[#070F26] font-bold shadow-md shadow-[#D4AF37]/20 ring-1 ring-[#F5D880]'
+                : 'bg-[#0A1636] text-blue-200 border border-[#1A3166] hover:text-[#F3C64F]'
             }`}
           >
             <CheckCircle2 className="h-3.5 w-3.5" />
@@ -314,8 +314,8 @@ export const TechnicianInboxView: React.FC<TechnicianInboxViewProps> = ({
               onClick={() => setActiveTab('t3')}
               className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-semibold transition ${
                 activeTab === 't3'
-                  ? 'bg-purple-500/30 text-purple-300 border border-purple-500/50'
-                  : 'bg-slate-900 text-slate-400 border border-slate-800 hover:text-white'
+                  ? 'bg-purple-950/60 text-purple-300 border border-purple-500/50'
+                  : 'bg-[#0A1636] text-blue-200 border border-[#1A3166] hover:text-[#F3C64F]'
               }`}
             >
               <ShieldAlert className="h-3.5 w-3.5 text-purple-400" />
@@ -324,7 +324,7 @@ export const TechnicianInboxView: React.FC<TechnicianInboxViewProps> = ({
           )}
         </div>
 
-        <span className="text-xs text-slate-400">
+        <span className="text-xs text-blue-300/70">
           Mostrati solo ticket di competenza <strong className="text-white">{currentUser.displayName}</strong>
         </span>
       </div>
@@ -332,9 +332,9 @@ export const TechnicianInboxView: React.FC<TechnicianInboxViewProps> = ({
       {/* Ticket List for the Active Tab */}
       <div className="space-y-4">
         {activeTab === 'pending' && pendingTickets.length === 0 && (
-          <div className="rounded-2xl border border-dashed border-slate-800 p-12 text-center text-slate-500 space-y-2">
+          <div className="rounded-2xl border border-dashed border-[#1A3166] p-12 text-center text-blue-300/60 space-y-2">
             <CheckCircle2 className="h-9 w-9 mx-auto text-emerald-400" />
-            <h3 className="text-sm font-semibold text-slate-300">
+            <h3 className="text-sm font-semibold text-blue-100">
               Nessun ticket in sospeso per {currentUser.displayName}!
             </h3>
             <p className="text-xs max-w-sm mx-auto">
@@ -344,14 +344,14 @@ export const TechnicianInboxView: React.FC<TechnicianInboxViewProps> = ({
         )}
 
         {activeTab === 'resolved' && resolvedTickets.length === 0 && (
-          <div className="rounded-2xl border border-dashed border-slate-800 p-12 text-center text-slate-500">
-            <p className="text-sm font-semibold text-slate-400">Nessun ticket archiviato come risolto in questa postazione.</p>
+          <div className="rounded-2xl border border-dashed border-[#1A3166] p-12 text-center text-blue-300/60">
+            <p className="text-sm font-semibold text-blue-200">Nessun ticket archiviato come risolto in questa postazione.</p>
           </div>
         )}
 
         {activeTab === 't3' && t3Tickets.length === 0 && (
-          <div className="rounded-2xl border border-dashed border-slate-800 p-12 text-center text-slate-500">
-            <p className="text-sm font-semibold text-slate-400">Nessun ticket attualmente escalato a ditte fornitrici esterne.</p>
+          <div className="rounded-2xl border border-dashed border-[#1A3166] p-12 text-center text-blue-300/60">
+            <p className="text-sm font-semibold text-blue-200">Nessun ticket attualmente escalato a ditte fornitrici esterne.</p>
           </div>
         )}
 
@@ -365,14 +365,14 @@ export const TechnicianInboxView: React.FC<TechnicianInboxViewProps> = ({
               key={ticket.id || ticket.ticketId}
               className={`rounded-2xl border p-5 sm:p-6 transition shadow-xl space-y-4 ${
                 isTransferredToMe
-                  ? 'border-amber-500/80 bg-slate-900 ring-2 ring-amber-500/30'
+                  ? 'border-[#D4AF37]/60 bg-[#0A1636] ring-2 ring-[#D4AF37]/20'
                   : isNewlyArrived
-                  ? 'border-cyan-400/80 bg-slate-900 ring-2 ring-cyan-500/40'
+                  ? 'border-[#D4AF37]/50 bg-[#0A1636] ring-2 ring-[#D4AF37]/30'
                   : ticket.priority === 'P1'
-                  ? 'border-red-500/40 bg-slate-900/90'
+                  ? 'border-red-500/40 bg-[#0A1636]/95'
                   : ticket.escalationT3
-                  ? 'border-purple-500/40 bg-slate-900/90'
-                  : 'border-slate-800 bg-slate-900/90'
+                  ? 'border-purple-500/40 bg-[#0A1636]/95'
+                  : 'border-[#1A3166] bg-[#0A1636]/95'
               }`}
             >
               {/* Header Info */}
@@ -386,10 +386,10 @@ export const TechnicianInboxView: React.FC<TechnicianInboxViewProps> = ({
                     {/* Priority Badge */}
                     <span className={`rounded-md px-2.5 py-0.5 text-xs font-bold font-mono border ${
                       ticket.priority === 'P1'
-                        ? 'bg-red-500/20 text-red-300 border-red-500/40'
+                        ? 'bg-rose-950/50 text-rose-300 border-rose-500/50 ring-1 ring-rose-500/30'
                         : ticket.priority === 'P2'
-                        ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
-                        : 'bg-blue-500/20 text-blue-300 border-blue-500/40'
+                        ? 'bg-[#D4AF37]/15 text-[#F3C64F] border-[#D4AF37]/40 ring-1 ring-[#D4AF37]/20'
+                        : 'bg-[#0E1F4B] text-blue-200 border-[#1E3975]'
                     }`}>
                       {ticket.priority} - {ticket.sla.split('-')[0]}
                     </span>
@@ -397,58 +397,58 @@ export const TechnicianInboxView: React.FC<TechnicianInboxViewProps> = ({
                     {/* Status Badge */}
                     <span className={`rounded-md px-2.5 py-0.5 text-xs font-semibold border ${
                       ticket.status === 'Risolto'
-                        ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+                        ? 'bg-emerald-950/50 text-emerald-300 border-emerald-500/40'
                         : ticket.status === 'In Lavorazione'
-                        ? 'bg-blue-500/20 text-blue-300 border-blue-500/40'
+                        ? 'bg-[#D4AF37]/15 text-[#F3C64F] border-[#D4AF37]/40 font-semibold'
                         : ticket.status === 'Escalato T3' || ticket.status === 'In Attesa Fornitore'
-                        ? 'bg-purple-500/20 text-purple-300 border-purple-500/40'
-                        : 'bg-amber-500/20 text-amber-300 border-amber-500/40'
+                        ? 'bg-purple-950/60 text-purple-300 border-purple-500/40'
+                        : 'bg-[#0E1F4B] text-[#F3C64F] border-[#D4AF37]/30'
                     }`}>
                       {ticket.status}
                     </span>
 
                     {ticket.escalationT3 && (
-                      <span className="rounded-md bg-purple-500/20 px-2 py-0.5 text-[11px] font-bold text-purple-300 border border-purple-500/40">
+                      <span className="rounded-md bg-purple-950/60 px-2 py-0.5 text-[11px] font-bold text-purple-300 border border-purple-500/40">
                         ⚡ Escalation T3
                       </span>
                     )}
 
                     {isTransferredToMe && (
-                      <span className="rounded-md bg-amber-500/20 px-2 py-0.5 text-[11px] font-bold text-amber-300 border border-amber-500/40 animate-pulse">
+                      <span className="rounded-md bg-[#D4AF37]/20 px-2 py-0.5 text-[11px] font-bold text-[#F3C64F] border border-[#D4AF37]/40 animate-pulse">
                         🔄 Ricevuto per Trasferimento
                       </span>
                     )}
                   </div>
 
-                  <div className="text-xs text-slate-400 flex flex-wrap items-center gap-2">
-                    <span>Segnalato da: <strong className="text-slate-200">{ticket.reporterName || 'Operatore'}</strong></span>
+                  <div className="text-xs text-blue-300/70 flex flex-wrap items-center gap-2">
+                    <span>Segnalato da: <strong className="text-blue-100">{ticket.reporterName || 'Operatore'}</strong></span>
                     <span>•</span>
-                    <span>Zona: <strong className="text-slate-200">{ticket.reporterZone || 'Generale'}</strong></span>
+                    <span>Zona: <strong className="text-blue-100">{ticket.reporterZone || 'Generale'}</strong></span>
                     <span>•</span>
                     <span className="font-mono">{ticket.timestamp}</span>
                   </div>
                 </div>
 
                 <div className="text-right">
-                  <span className="text-[11px] text-slate-400 block uppercase">Assegnato a:</span>
-                  <span className="text-xs font-bold text-cyan-300">{ticket.assignedTo}</span>
+                  <span className="text-[11px] text-blue-300/70 block uppercase">Assegnato a:</span>
+                  <span className="text-xs font-bold text-[#F3C64F]">{ticket.assignedTo}</span>
                 </div>
               </div>
 
               {/* Transfer Details Callout if present */}
               {ticket.lastTransfer && (
-                <div className="rounded-xl border border-amber-500/40 bg-amber-950/20 p-3 flex items-start gap-2.5 text-xs">
-                  <ArrowRightLeft className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
+                <div className="rounded-xl border border-[#D4AF37]/40 bg-[#070F24]/80 p-3 flex items-start gap-2.5 text-xs">
+                  <ArrowRightLeft className="h-4 w-4 text-[#D4AF37] shrink-0 mt-0.5" />
                   <div className="space-y-0.5 flex-1">
                     <div className="flex flex-wrap items-center justify-between gap-2">
-                      <strong className="text-amber-300 font-semibold">
+                      <strong className="text-[#F3C64F] font-semibold">
                         Spostamento Livello: Da {ticket.lastTransfer.fromName} a {ticket.lastTransfer.toName} [{ticket.lastTransfer.targetLevel}]
                       </strong>
-                      <span className="text-[10px] text-amber-400/80 font-mono">
+                      <span className="text-[10px] text-blue-300/60 font-mono">
                         {new Date(ticket.lastTransfer.transferredAtIso).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}
                       </span>
                     </div>
-                    <p className="text-amber-100/90 text-[11px]">
+                    <p className="text-blue-200 text-[11px]">
                       <strong>Motivo specificato:</strong> "{ticket.lastTransfer.reason}"
                     </p>
                   </div>
@@ -456,25 +456,25 @@ export const TechnicianInboxView: React.FC<TechnicianInboxViewProps> = ({
               )}
 
               {/* Problem Content Box */}
-              <div className="rounded-xl border border-slate-800/80 bg-slate-950/70 p-4 space-y-2">
-                <div className="flex items-center justify-between text-xs text-slate-400">
-                  <span className="font-semibold text-slate-300">Asset: <strong className="text-white">{ticket.asset}</strong></span>
+              <div className="rounded-xl border border-[#1A3166] bg-[#070F24]/80 p-4 space-y-2">
+                <div className="flex items-center justify-between text-xs text-blue-300/70">
+                  <span className="font-semibold text-blue-100">Asset: <strong className="text-white">{ticket.asset}</strong></span>
                   <span className="font-mono text-[11px]">{ticket.sla}</span>
                 </div>
 
-                <p className="text-sm text-slate-200 leading-relaxed font-sans">
+                <p className="text-sm text-blue-100 leading-relaxed font-sans">
                   "{ticket.userMessage}"
                 </p>
 
-                <div className="pt-2 border-t border-slate-800/60 text-xs text-slate-400 flex items-start gap-1.5">
-                  <Wrench className="h-3.5 w-3.5 text-cyan-400 shrink-0 mt-0.5" />
+                <div className="pt-2 border-t border-[#1A3166]/80 text-xs text-blue-300/70 flex items-start gap-1.5">
+                  <Wrench className="h-3.5 w-3.5 text-[#D4AF37] shrink-0 mt-0.5" />
                   <span><strong>Azione Suggerita:</strong> {ticket.actionRequired}</span>
                 </div>
               </div>
 
               {/* T3 Escalation Callout if present */}
               {ticket.escalationT3 && (
-                <div className="rounded-xl border border-purple-500/40 bg-purple-950/20 p-3.5 text-xs text-purple-200 space-y-2">
+                <div className="rounded-xl border border-purple-500/40 bg-purple-950/30 p-3.5 text-xs text-purple-200 space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="font-bold flex items-center gap-1.5 text-purple-300">
                       <ShieldAlert className="h-4 w-4" />
@@ -482,7 +482,7 @@ export const TechnicianInboxView: React.FC<TechnicianInboxViewProps> = ({
                     </span>
                     <span className="font-mono text-[10px] text-purple-300/80">Regola di Governance</span>
                   </div>
-                  <p className="text-slate-300 text-xs">
+                  <p className="text-blue-200 text-xs">
                     {ticket.escalationT3Note}
                   </p>
 
@@ -496,7 +496,7 @@ export const TechnicianInboxView: React.FC<TechnicianInboxViewProps> = ({
                         onChange={(e) =>
                           setVendorRefInputs((prev) => ({ ...prev, [ticket.ticketId]: e.target.value }))
                         }
-                        className="rounded-lg border border-purple-500/40 bg-slate-900 px-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-purple-400 flex-1 min-w-[200px]"
+                        className="rounded-lg border border-purple-500/40 bg-[#070F24] px-3 py-1.5 text-xs text-white placeholder-blue-300/40 focus:outline-none focus:border-purple-400 flex-1 min-w-[200px]"
                       />
                       <button
                         onClick={() => handleVendorCallConfirmed(ticket.ticketId)}
@@ -511,13 +511,13 @@ export const TechnicianInboxView: React.FC<TechnicianInboxViewProps> = ({
               )}
 
               {/* Action Buttons Toolbar */}
-              <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-800">
+              <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-[#1A3166]">
                 <div className="flex flex-wrap items-center gap-2">
                   {/* Status update buttons */}
                   {ticket.status === 'Aperto' && (
                     <button
                       onClick={() => onStatusChange(ticket.ticketId, 'In Lavorazione')}
-                      className="rounded-xl bg-cyan-600 hover:bg-cyan-500 px-3.5 py-1.5 text-xs font-bold text-white transition shadow-sm"
+                      className="rounded-xl bg-gradient-to-r from-[#D4AF37] via-[#F3C64F] to-[#D4AF37] hover:brightness-110 px-3.5 py-1.5 text-xs font-bold text-[#070F26] transition shadow-md shadow-[#D4AF37]/20"
                     >
                       Prendi in Carico
                     </button>
@@ -537,10 +537,10 @@ export const TechnicianInboxView: React.FC<TechnicianInboxViewProps> = ({
                   {ticket.status !== 'Risolto' && ticket.status !== 'Chiuso' && (
                     <button
                       onClick={() => onOpenTransferModal(ticket)}
-                      className="flex items-center gap-1.5 rounded-xl border border-cyan-500/40 bg-cyan-950/30 px-3 py-1.5 text-xs font-bold text-cyan-300 hover:bg-cyan-900/40 transition shadow-sm"
+                      className="flex items-center gap-1.5 rounded-xl border border-[#D4AF37]/40 bg-[#D4AF37]/10 px-3 py-1.5 text-xs font-bold text-[#F3C64F] hover:bg-[#D4AF37]/20 transition shadow-sm"
                       title="Sposta questo ticket a un altro livello o tecnico e invia una notifica immediata"
                     >
-                      <ArrowRightLeft className="h-3.5 w-3.5 text-cyan-400" />
+                      <ArrowRightLeft className="h-3.5 w-3.5 text-[#D4AF37]" />
                       <span>Sposta Livello / Riassegna</span>
                     </button>
                   )}
@@ -561,16 +561,16 @@ export const TechnicianInboxView: React.FC<TechnicianInboxViewProps> = ({
                   {onAskAI && (
                     <button
                       onClick={() => onAskAI(ticket)}
-                      className="flex items-center gap-1.5 rounded-xl border border-indigo-500/40 bg-indigo-950/40 px-3 py-1.5 text-xs font-bold text-indigo-300 hover:bg-indigo-900/50 hover:border-indigo-400 transition shadow-sm"
+                      className="flex items-center gap-1.5 rounded-xl border border-[#D4AF37]/40 bg-[#D4AF37]/10 px-3 py-1.5 text-xs font-bold text-[#F3C64F] hover:bg-[#D4AF37]/20 transition shadow-sm"
                       title="Inoltra la segnalazione all'Assistente AI per diagnosi tecnica immediata e supporto operativo"
                     >
-                      <Sparkles className="h-3.5 w-3.5 text-indigo-400" />
+                      <Sparkles className="h-3.5 w-3.5 text-[#D4AF37]" />
                       <span>Chiedi ad Assistente AI</span>
                     </button>
                   )}
                 </div>
 
-                <span className="text-[11px] text-slate-500 font-mono">
+                <span className="text-[11px] text-blue-300/60 font-mono">
                   SLA: {ticket.priority === 'P1' ? '15m / 2h' : ticket.priority === 'P2' ? '30m / 4h' : '1h / 8h'}
                 </span>
               </div>
@@ -579,10 +579,10 @@ export const TechnicianInboxView: React.FC<TechnicianInboxViewProps> = ({
               <div className="space-y-2 pt-2">
                 {ticket.notes && ticket.notes.length > 0 && (
                   <div className="space-y-1">
-                    <span className="text-[11px] font-semibold text-slate-400">Note Tecniche Registrate:</span>
+                    <span className="text-[11px] font-semibold text-blue-300/70">Note Tecniche Registrate:</span>
                     <div className="space-y-1">
                       {ticket.notes.map((note, idx) => (
-                        <div key={idx} className="rounded-lg bg-slate-950/80 px-3 py-1.5 text-xs text-slate-300 border border-slate-800 font-mono">
+                        <div key={idx} className="rounded-lg bg-[#070F24]/80 px-3 py-1.5 text-xs text-blue-200 border border-[#1A3166] font-mono">
                           {note}
                         </div>
                       ))}
@@ -603,11 +603,11 @@ export const TechnicianInboxView: React.FC<TechnicianInboxViewProps> = ({
                       onKeyDown={(e) => {
                         if (e.key === 'Enter') handleNoteSubmit(ticket.ticketId);
                       }}
-                      className="rounded-xl border border-slate-800 bg-slate-950 px-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 flex-1"
+                      className="rounded-xl border border-[#1A3166] bg-[#070F24] px-3 py-1.5 text-xs text-white placeholder-blue-300/40 focus:outline-none focus:border-[#D4AF37] flex-1"
                     />
                     <button
                       onClick={() => handleNoteSubmit(ticket.ticketId)}
-                      className="rounded-xl border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs font-semibold text-slate-200 hover:bg-slate-700 transition"
+                      className="rounded-xl border border-[#1A3166] bg-[#0E1F4B] px-3 py-1.5 text-xs font-semibold text-blue-200 hover:bg-[#152B66] hover:text-white transition"
                     >
                       Aggiungi Nota
                     </button>

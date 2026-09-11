@@ -47,7 +47,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   const getRoleIcon = (id: string) => {
     switch (id) {
       case 'benin':
-        return <Gamepad2 className="h-3.5 w-3.5 text-amber-400" />;
+        return <Gamepad2 className="h-3.5 w-3.5 text-[#EDE5D8]" />;
       case 'padovani':
         return <Building2 className="h-3.5 w-3.5 text-emerald-400" />;
       case 'ayoub':
@@ -64,7 +64,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   const isTechnician = currentUser.type === 'technician';
 
   return (
-    <header className="sticky top-0 z-40 border-b border-slate-800/80 bg-slate-950/90 backdrop-blur-md">
+    <header className="sticky top-0 z-40 border-b border-[#1A3166] bg-[#070F26]/95 backdrop-blur-md">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 gap-3">
           
@@ -72,13 +72,13 @@ export const Navbar: React.FC<NavbarProps> = ({
           <div className="flex items-center gap-3 shrink-0">
             <div 
               onClick={() => onViewChange(currentUser.type === 'reporter' ? 'portal' : 'inbox')}
-              className="cursor-pointer flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-cyan-600 via-blue-600 to-indigo-600 shadow-md shadow-cyan-900/30 text-white font-bold font-mono hover:scale-105 transition"
+              className="cursor-pointer flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#D4AF37] via-[#F3C64F] to-[#D4AF37] shadow-md shadow-black/60 text-[#070F26] font-black font-mono hover:scale-105 transition border border-[#F5D880]"
             >
               ITSM
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-bold text-white text-xs sm:text-sm tracking-tight">
+                <span className="font-bold text-[#F3C64F] text-xs sm:text-sm tracking-tight">
                   Centro Operativo
                 </span>
                 <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 text-[10px] font-semibold text-emerald-400">
@@ -86,7 +86,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   Online
                 </span>
               </div>
-              <p className="text-[11px] text-slate-400 hidden xl:block">
+              <p className="text-[11px] text-blue-200/70 hidden xl:block">
                 Gaming • Food & Beverage • Facility • IT
               </p>
             </div>
@@ -100,11 +100,11 @@ export const Navbar: React.FC<NavbarProps> = ({
               onClick={() => onViewChange('portal')}
               className={`flex items-center gap-1.5 rounded-xl px-3 py-1.5 sm:px-3.5 sm:py-2 text-xs font-semibold transition ${
                 currentView === 'portal'
-                  ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-md shadow-cyan-900/30 ring-1 ring-cyan-400/40'
-                  : 'text-slate-300 hover:bg-slate-900 hover:text-white'
+                  ? 'bg-gradient-to-r from-[#D4AF37] via-[#F3C64F] to-[#D4AF37] text-[#070F26] font-bold shadow-md shadow-[#D4AF37]/20 ring-1 ring-[#F5D880]'
+                  : 'text-blue-100/90 hover:bg-[#0E1C42] hover:text-[#F3C64F]'
               }`}
             >
-              <Send className="h-3.5 w-3.5 text-cyan-300" />
+              <Send className={`h-3.5 w-3.5 ${currentView === 'portal' ? 'text-[#070F26]' : 'text-[#D4AF37]'}`} />
               <span className="whitespace-nowrap">
                 {currentUser.type === 'reporter' ? 'Nuova Segnalazione' : 'Segnala Disservizio'}
               </span>
@@ -117,8 +117,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                 onClick={() => onViewChange('inbox')}
                 className={`flex items-center gap-1.5 rounded-xl px-3 py-1.5 sm:px-3.5 sm:py-2 text-xs font-semibold transition relative ${
                   currentView === 'inbox'
-                    ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-md shadow-cyan-900/30 ring-1 ring-cyan-400/40'
-                    : 'text-slate-300 hover:bg-slate-900 hover:text-white'
+                    ? 'bg-gradient-to-r from-[#D4AF37] via-[#F3C64F] to-[#D4AF37] text-[#070F26] font-bold shadow-md shadow-[#D4AF37]/20 ring-1 ring-[#F5D880]'
+                    : 'text-blue-100/90 hover:bg-[#0E1C42] hover:text-[#F3C64F]'
                 }`}
               >
                 <Inbox className="h-3.5 w-3.5" />
@@ -127,7 +127,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 </span>
 
                 {openTicketCount > 0 && (
-                  <span className="flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-cyan-400 text-[10px] font-bold text-slate-950 font-mono">
+                  <span className="flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-[#070F26] text-[10px] font-black text-[#F3C64F] border border-[#D4AF37]/60 font-mono">
                     {openTicketCount}
                   </span>
                 )}
@@ -135,7 +135,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 {unreadTransferCount > 0 && (
                   <span 
                     title={`${unreadTransferCount} ticket trasferiti al tuo livello!`}
-                    className="flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-amber-400 text-[10px] font-bold text-slate-950 font-mono animate-bounce"
+                    className="flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-[#D4AF37] text-[10px] font-bold text-[#070F26] font-mono animate-bounce"
                   >
                     +{unreadTransferCount}
                   </span>
@@ -150,8 +150,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                 onClick={() => onViewChange('chat')}
                 className={`hidden sm:flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold transition ${
                   currentView === 'chat'
-                    ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-md shadow-cyan-900/20'
-                    : 'text-slate-300 hover:bg-slate-900 hover:text-white'
+                    ? 'bg-gradient-to-r from-[#D4AF37] via-[#F3C64F] to-[#D4AF37] text-[#070F26] font-bold shadow-md shadow-[#D4AF37]/20 ring-1 ring-[#F5D880]'
+                    : 'text-blue-100/90 hover:bg-[#0E1C42] hover:text-[#F3C64F]'
                 }`}
               >
                 <MessageSquare className="h-3.5 w-3.5" />
@@ -166,8 +166,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                 onClick={() => onViewChange('board')}
                 className={`hidden md:flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold transition ${
                   currentView === 'board'
-                    ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-md shadow-cyan-900/20'
-                    : 'text-slate-300 hover:bg-slate-900 hover:text-white'
+                    ? 'bg-gradient-to-r from-[#D4AF37] via-[#F3C64F] to-[#D4AF37] text-[#070F26] font-bold shadow-md shadow-[#D4AF37]/20 ring-1 ring-[#F5D880]'
+                    : 'text-blue-100/90 hover:bg-[#0E1C42] hover:text-[#F3C64F]'
                 }`}
               >
                 <FileText className="h-3.5 w-3.5" />
@@ -181,8 +181,8 @@ export const Navbar: React.FC<NavbarProps> = ({
               onClick={() => onViewChange('design')}
               className={`hidden lg:flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold transition ${
                 currentView === 'design'
-                  ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-md shadow-cyan-900/20'
-                  : 'text-slate-300 hover:bg-slate-900 hover:text-white'
+                  ? 'bg-gradient-to-r from-[#D4AF37] via-[#F3C64F] to-[#D4AF37] text-[#070F26] font-bold shadow-md shadow-[#D4AF37]/20 ring-1 ring-[#F5D880]'
+                  : 'text-blue-100/90 hover:bg-[#0E1C42] hover:text-[#F3C64F]'
               }`}
             >
               <Layers className="h-3.5 w-3.5" />
@@ -194,8 +194,8 @@ export const Navbar: React.FC<NavbarProps> = ({
           <div className="flex items-center gap-2 shrink-0">
             
             {/* Active User Information Badge */}
-            <div className="flex items-center gap-2 rounded-xl border border-slate-800 bg-slate-900/80 px-2.5 sm:px-3 py-1.5 text-xs text-slate-200">
-              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-800 border border-slate-700 shrink-0">
+            <div className="flex items-center gap-2 rounded-xl border border-[#1A3166] bg-[#0A1636]/90 px-2.5 sm:px-3 py-1.5 text-xs text-blue-100">
+              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#0E1F4B] border border-[#1E3975] shrink-0">
                 {getRoleIcon(currentUser.id)}
               </div>
 
@@ -204,35 +204,35 @@ export const Navbar: React.FC<NavbarProps> = ({
                   <span>{currentUser.displayName}</span>
                   {/* Badges based on permissions */}
                   {currentUser.type === 'reporter' ? (
-                    <span className="text-[9px] px-1.5 py-0.2 rounded bg-slate-800 text-slate-300 border border-slate-700">
+                    <span className="text-[9px] px-1.5 py-0.2 rounded bg-[#0E1F4B] text-blue-200 border border-[#1E3975]">
                       Utente
                     </span>
                   ) : (
                     <div className="flex items-center gap-1">
                       {currentUser.permissions?.t1 && (
-                        <span className="text-[9px] px-1 py-0.2 rounded bg-cyan-950 text-cyan-300 border border-cyan-500/30">
+                        <span className="text-[9px] px-1 py-0.2 rounded bg-[#D4AF37]/15 text-[#F3C64F] border border-[#D4AF37]/40 font-semibold">
                           T1
                         </span>
                       )}
                       {currentUser.permissions?.t2 && (
-                        <span className="text-[9px] px-1 py-0.2 rounded bg-amber-950 text-amber-300 border border-amber-500/30">
+                        <span className="text-[9px] px-1 py-0.2 rounded bg-[#0E1F4B] text-blue-200 border border-[#1E3975] font-semibold">
                           T2
                         </span>
                       )}
                       {currentUser.permissions?.t3Vendor && (
-                        <span className="text-[9px] px-1 py-0.2 rounded bg-purple-950 text-purple-300 border border-purple-500/30 font-semibold">
+                        <span className="text-[9px] px-1 py-0.2 rounded bg-purple-950/70 text-purple-300 border border-purple-500/40 font-semibold">
                           T3
                         </span>
                       )}
                       {currentUser.permissions?.coordination && (
-                        <span className="text-[9px] px-1 py-0.2 rounded bg-indigo-950 text-indigo-300 border border-indigo-500/30 font-semibold">
+                        <span className="text-[9px] px-1 py-0.2 rounded bg-[#D4AF37]/20 text-[#F3C64F] border border-[#D4AF37]/50 font-semibold">
                           Coord
                         </span>
                       )}
                     </div>
                   )}
                 </div>
-                <div className="text-[10px] text-slate-400 leading-tight truncate max-w-[130px] hidden sm:block">
+                <div className="text-[10px] text-blue-200/70 leading-tight truncate max-w-[130px] hidden sm:block">
                   {currentUser.role}
                 </div>
               </div>
@@ -253,10 +253,10 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               onClick={onOpenOnlineModal}
               id="btn-online-share"
-              className="hidden md:flex items-center gap-1.5 rounded-xl border border-cyan-500/40 bg-cyan-950/40 px-2.5 sm:px-3 py-1.5 text-xs font-bold text-cyan-300 hover:bg-cyan-900/40 transition shadow-sm"
+              className="hidden md:flex items-center gap-1.5 rounded-xl border border-[#D4AF37]/50 bg-[#D4AF37]/10 px-2.5 sm:px-3 py-1.5 text-xs font-bold text-[#F3C64F] hover:bg-[#D4AF37]/20 transition shadow-sm"
               title="Apri link pubblico per testare l'invio su cellulare o altra finestra"
             >
-              <Globe className="h-3.5 w-3.5 text-cyan-400" />
+              <Globe className="h-3.5 w-3.5 text-[#D4AF37]" />
               <span>Condividi</span>
             </button>
           </div>
