@@ -3,6 +3,7 @@ import { AssetInfo, AssetCategory, ITSMTicket } from '../types';
 import { ASSET_CATALOG, ASSET_AREAS, AssetAreaInfo, INITIAL_TICKETS } from '../data/itsmData';
 import { AddAssetModal } from './AddAssetModal';
 import { AssetTicketReportModal, isTicketForAsset } from './AssetTicketReportModal';
+import { SingleAssetTicketsModal } from './SingleAssetTicketsModal';
 import { 
   Plus, 
   Search, 
@@ -50,6 +51,10 @@ export const AssetCatalogView: React.FC<AssetCatalogViewProps> = ({
   // Modal state for Ticket Report
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [reportModalAssetId, setReportModalAssetId] = useState<string>('all');
+
+  // Dedicated single asset ticket modal
+  const [selectedSingleAsset, setSelectedSingleAsset] = useState<AssetInfo | null>(null);
+  const [isSingleAssetModalOpen, setIsSingleAssetModalOpen] = useState(false);
 
   // Tickets list
   const [localTickets, setLocalTickets] = useState<ITSMTicket[]>(allTickets || INITIAL_TICKETS);
@@ -293,13 +298,18 @@ export const AssetCatalogView: React.FC<AssetCatalogViewProps> = ({
                 setReportModalAssetId('all');
                 setIsReportModalOpen(true);
               }}
-              className="flex items-center gap-2.5 rounded-xl border border-[#D4AF37]/50 bg-[#0E1F4B] hover:bg-[#D4AF37]/20 px-4 py-3 text-xs font-black text-[#F3C64F] shadow-lg shadow-[#D4AF37]/10 transition active:scale-95"
+              className="flex items-center gap-2.5 rounded-xl border border-[#D4AF37]/50 bg-[#0E1F4B] hover:bg-[#D4AF37]/20 px-4 py-3 text-xs font-black text-[#F3C64F] shadow-lg shadow-[#D4AF37]/10 transition active:scale-95 cursor-pointer"
             >
               <BarChart3 className="h-4 w-4 text-[#D4AF37]" />
-              <span>Report Ticket & Risoluzioni</span>
-              <span className="rounded-full bg-[#D4AF37]/25 border border-[#D4AF37]/50 px-2 py-0.5 text-[10px] font-mono text-white font-bold">
+              <span>Report, Grafici & Export</span>
+              <span className="rounded-full bg-emerald-500/20 border border-emerald-500/40 px-2 py-0.5 text-[10px] font-mono text-emerald-300 font-bold">
                 {totalResolvedTickets} Risolti
               </span>
+              {totalUnresolvedTickets > 0 && (
+                <span className="rounded-full bg-amber-500/20 border border-amber-500/40 px-2 py-0.5 text-[10px] font-mono text-amber-300 font-bold">
+                  {totalUnresolvedTickets} Aperti
+                </span>
+              )}
             </button>
 
             <button
@@ -597,11 +607,11 @@ export const AssetCatalogView: React.FC<AssetCatalogViewProps> = ({
                                 <button
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    setReportModalAssetId(asset.id);
-                                    setIsReportModalOpen(true);
+                                    setSelectedSingleAsset(asset);
+                                    setIsSingleAssetModalOpen(true);
                                   }}
                                   className="inline-flex items-center gap-1 rounded-md bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/35 px-2 py-0.5 text-[10px] font-bold text-emerald-300 transition"
-                                  title={`Clicca per visualizzare i ${resolvedOnAsset} ticket risolti per ${asset.id}`}
+                                  title={`Clicca per visualizzare i ${resolvedOnAsset} ticket di ${asset.id}`}
                                 >
                                   <CheckCircle2 className="h-3 w-3 text-emerald-400" />
                                   <span>{resolvedOnAsset} Risolti</span>
@@ -611,8 +621,8 @@ export const AssetCatalogView: React.FC<AssetCatalogViewProps> = ({
                                   <button
                                     onClick={(e) => {
                                       e.stopPropagation();
-                                      setReportModalAssetId(asset.id);
-                                      setIsReportModalOpen(true);
+                                      setSelectedSingleAsset(asset);
+                                      setIsSingleAssetModalOpen(true);
                                     }}
                                     className="inline-flex items-center gap-1 rounded-md bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 px-2 py-0.5 text-[10px] font-bold text-amber-300 transition"
                                     title={`${unresolvedOnAsset} ticket in lavorazione per ${asset.id}`}
@@ -626,12 +636,13 @@ export const AssetCatalogView: React.FC<AssetCatalogViewProps> = ({
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  setReportModalAssetId(asset.id);
-                                  setIsReportModalOpen(true);
+                                  setSelectedSingleAsset(asset);
+                                  setIsSingleAssetModalOpen(true);
                                 }}
                                 className="flex items-center gap-0.5 text-[10px] font-bold text-[#F3C64F] hover:text-[#D4AF37] hover:underline"
+                                title={`Vedi tutti i ticket per ${asset.id}`}
                               >
-                                <span>Report</span>
+                                <span>Ticket ({assetTickets.length})</span>
                                 <ChevronRight className="h-3 w-3" />
                               </button>
                             </div>
@@ -764,11 +775,11 @@ export const AssetCatalogView: React.FC<AssetCatalogViewProps> = ({
                       <td className="p-3.5 text-center">
                         <button
                           onClick={() => {
-                            setReportModalAssetId(asset.id);
-                            setIsReportModalOpen(true);
+                            setSelectedSingleAsset(asset);
+                            setIsSingleAssetModalOpen(true);
                           }}
-                          className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/35 px-2.5 py-1 text-xs font-bold text-emerald-300 transition"
-                          title={`Visualizza i ${resolvedOnAsset} ticket risolti per ${asset.id}`}
+                          className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/35 px-2.5 py-1 text-xs font-bold text-emerald-300 transition cursor-pointer"
+                          title={`Visualizza esclusivamente i ticket per ${asset.id}`}
                         >
                           <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
                           <span>{resolvedOnAsset} Risolti</span>
@@ -810,7 +821,7 @@ export const AssetCatalogView: React.FC<AssetCatalogViewProps> = ({
         existingAssetIds={existingAssetIds}
       />
 
-      {/* Ticket Report Modal per Asset & Aree */}
+      {/* Ticket Report Modal per Asset & Aree (Global Facility Report with Charts & Exports) */}
       <AssetTicketReportModal
         isOpen={isReportModalOpen}
         onClose={() => setIsReportModalOpen(false)}
@@ -818,6 +829,24 @@ export const AssetCatalogView: React.FC<AssetCatalogViewProps> = ({
         assets={assets}
         initialAssetId={reportModalAssetId}
         onAskAI={onAskAI}
+        onOpenSingleAsset={(asset) => {
+          setIsReportModalOpen(false);
+          setSelectedSingleAsset(asset);
+          setIsSingleAssetModalOpen(true);
+        }}
+      />
+
+      {/* Dedicated Single Asset Tickets Modal (Opens directly when clicking on an asset's ticket indicator) */}
+      <SingleAssetTicketsModal
+        isOpen={isSingleAssetModalOpen}
+        onClose={() => {
+          setIsSingleAssetModalOpen(false);
+          setSelectedSingleAsset(null);
+        }}
+        asset={selectedSingleAsset}
+        allTickets={localTickets}
+        onAskAI={onAskAI}
+        onReportIssueForAsset={onReportIssueForAsset}
       />
     </div>
   );

@@ -21,7 +21,9 @@ import {
   CheckCheck,
   Timer,
   FileText,
-  Plus
+  Plus,
+  Download,
+  FileSpreadsheet
 } from 'lucide-react';
 import { isTicketForAsset, getElapsedTime, formatDuration } from './AssetTicketReportModal';
 
@@ -117,6 +119,55 @@ export const SingleAssetTicketsModal: React.FC<SingleAssetTicketsModalProps> = (
     });
   }, [assetTickets, activeFilter, searchQuery]);
 
+  // Export single asset tickets to CSV
+  const handleExportAssetCSV = () => {
+    if (!asset) return;
+    const headers = [
+      'ID Ticket',
+      'ID Asset',
+      'Nome Asset',
+      'Area',
+      'Priorità',
+      'Stato',
+      'Data Apertura',
+      'Data Risoluzione',
+      'Durata Minuti',
+      'Tecnico Assegnato',
+      'Risolto Da',
+      'Descrizione Guasto',
+      'Azione / Note Risoluzione'
+    ];
+
+    const rows = assetTickets.map(t => {
+      return [
+        `"${t.ticketId || t.id}"`,
+        `"${asset.id}"`,
+        `"${asset.name.replace(/"/g, '""')}"`,
+        `"${asset.area}"`,
+        `"${t.priority}"`,
+        `"${t.status}"`,
+        `"${t.createdAtIso || t.timestamp || ''}"`,
+        `"${t.resolvedAtIso || ''}"`,
+        `"${t.durationMinutes || ''}"`,
+        `"${(t.assignedTo || '').replace(/"/g, '""')}"`,
+        `"${(t.resolvedBy || '').replace(/"/g, '""')}"`,
+        `"${(t.userMessage || '').replace(/"/g, '""')}"`,
+        `"${(t.resolutionNotes || t.actionRequired || '').replace(/"/g, '""')}"`
+      ];
+    });
+
+    const csvContent = '\uFEFF' + [headers.join(';'), ...rows.map(r => r.join(';'))].join('\r\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `ITSM_Ticket_Asset_${asset.id}_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   if (!isOpen || !asset) return null;
 
   // Render Area Icon helper
@@ -192,14 +243,26 @@ export const SingleAssetTicketsModal: React.FC<SingleAssetTicketsModalProps> = (
               </div>
             </div>
 
-            {/* Close Button */}
-            <button
-              onClick={onClose}
-              className="rounded-xl border border-[#1A3166] bg-[#0E1F4B] p-2 text-blue-300 hover:text-white hover:bg-[#152e6c] hover:border-red-500/40 transition active:scale-95"
-              aria-label="Chiudi"
-            >
-              <X className="h-5 w-5" />
-            </button>
+            {/* Action Buttons */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleExportAssetCSV}
+                className="flex items-center gap-1.5 rounded-xl border border-emerald-500/40 bg-emerald-500/15 hover:bg-emerald-500/25 px-3 py-1.5 text-xs font-bold text-emerald-300 transition active:scale-95 shadow-sm cursor-pointer"
+                title={`Esporta i ticket di ${asset.id} in formato CSV`}
+              >
+                <FileSpreadsheet className="h-4 w-4 text-emerald-400" />
+                <span className="hidden sm:inline">Esporta CSV</span>
+              </button>
+
+              {/* Close Button */}
+              <button
+                onClick={onClose}
+                className="rounded-xl border border-[#1A3166] bg-[#0E1F4B] p-2 text-blue-300 hover:text-white hover:bg-[#152e6c] hover:border-red-500/40 transition active:scale-95 cursor-pointer"
+                aria-label="Chiudi"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
           </div>
 
           {/* ASSET METRICS STRIP */}

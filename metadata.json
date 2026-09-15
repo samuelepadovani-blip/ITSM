@@ -1,6 +1,6 @@
 {
   "name": "Centro Operativo ITSM & Helpdesk Virtuale",
-  "description": "Piattaforma di ITSM Service Management e Helpdesk Virtuale per centro multifunzionale (Gaming, F&B, Facility, IT) con triage automatico, routing dei ticket ed escalation T3.",
+  "description": "Piattaforma di ITSM Service Management e Helpdesk Virtuale con gestione asset, diagnostica AI, report analitici con grafici per criticità, confronto chiusi/aperti ed export CSV/JSON.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
