@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ITSMTicket, TicketStatus, TechnicianId, UserAccount } from './types';
+import { ITSMTicket, TicketStatus, TechnicianId, UserAccount, PriorityLevel } from './types';
 import { INITIAL_TICKETS } from './data/itsmData';
 import { USER_ACCOUNTS } from './data/accountsData';
 import { Navbar, ActiveView } from './components/Navbar';
@@ -365,6 +365,71 @@ export default function App() {
     }
   };
 
+  // Priority confirmation handler (Admin final decision)
+  const handleConfirmPriority = async (
+    ticketId: string,
+    priority: PriorityLevel,
+    reason?: string
+  ) => {
+    try {
+      const res = await fetch(`/api/tickets/${ticketId}/confirm-priority`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          priority,
+          adminName: currentUser.displayName,
+          reason: reason || '',
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error('Errore durante la convalida della priorità');
+      }
+
+      const data = await res.json();
+      if (data.ticket) {
+        setTickets((prev) =>
+          prev.map((t) => (t.ticketId === ticketId || t.id === ticketId ? data.ticket : t))
+        );
+
+        if (soundEnabled) {
+          playNotificationChime('P3');
+        }
+
+        setToastMessage(
+          `✓ Priorità ${priority} convalidata come scelta finale dall'Admin ${currentUser.displayName} per il Ticket #${ticketId}!`
+        );
+        setTimeout(() => setToastMessage(null), 5000);
+      }
+    } catch (err: any) {
+      console.error('Priority confirmation error:', err);
+      const slaMap: Record<string, string> = {
+        P1: 'P1 Critico - Presa in carico < 15 min / Risoluzione < 2h',
+        P2: 'P2 Alto - Presa in carico < 30 min / Risoluzione < 4h',
+        P3: 'P3 Medio - Presa in carico < 2h / Risoluzione < 8h',
+        P4: 'P4 Basso - Presa in carico < 4h / Risoluzione < 24-48h',
+      };
+      setTickets((prev) =>
+        prev.map((t) => {
+          if (t.ticketId === ticketId || t.id === ticketId) {
+            return {
+              ...t,
+              priority,
+              sla: slaMap[priority] || t.sla,
+              priorityConfirmed: true,
+              priorityConfirmedBy: currentUser.displayName,
+              priorityConfirmedAt: new Date().toISOString(),
+              priorityChangeReason: reason || t.priorityChangeReason,
+            };
+          }
+          return t;
+        })
+      );
+      setToastMessage(`✓ Priorità ${priority} convalidata per il Ticket #${ticketId}`);
+      setTimeout(() => setToastMessage(null), 5000);
+    }
+  };
+
   const handleAddNote = async (ticketId: string, note: string) => {
     const nowTime = new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
     setTickets((prev) =>
@@ -529,6 +594,7 @@ Prendi in carico il problema e forniscimi subito la serie completa di passaggi o
             onStatusChange={handleStatusChange}
             onEscalateT3={handleEscalateT3}
             onAddNote={handleAddNote}
+            onConfirmPriority={handleConfirmPriority}
             onOpenTransferModal={(ticket) => {
               setTicketToTransfer(ticket);
               setIsTransferModalOpen(true);
@@ -560,6 +626,7 @@ Prendi in carico il problema e forniscimi subito la serie completa di passaggi o
             tickets={tickets}
             onStatusChange={handleStatusChange}
             onAskAI={handleAskAI}
+            onConfirmPriority={handleConfirmPriority}
           />
         )}
 

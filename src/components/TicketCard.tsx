@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ITSMTicket, TicketStatus } from '../types';
+import { ITSMTicket, TicketStatus, PriorityLevel } from '../types';
 import { 
   Check, 
   Copy, 
@@ -10,13 +10,16 @@ import {
   ShieldAlert, 
   FileText,
   ChevronDown,
-  Sparkles
+  Sparkles,
+  Crown,
+  CheckCircle2
 } from 'lucide-react';
 
 interface TicketCardProps {
   ticket: ITSMTicket;
   onStatusChange?: (ticketId: string, newStatus: TicketStatus) => void;
   onAskAI?: (ticket: ITSMTicket) => void;
+  onConfirmPriority?: (ticketId: string, priority: PriorityLevel, reason?: string) => void;
   compact?: boolean;
 }
 
@@ -24,10 +27,12 @@ export const TicketCard: React.FC<TicketCardProps> = ({
   ticket,
   onStatusChange,
   onAskAI,
+  onConfirmPriority,
   compact = false,
 }) => {
   const [copied, setCopied] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
+  const [isChangingPriority, setIsChangingPriority] = useState(false);
 
   const handleCopy = () => {
     const formattedText = `- **ID Ticket**: ${ticket.ticketId}
@@ -188,11 +193,77 @@ export const TicketCard: React.FC<TicketCardProps> = ({
           </div>
 
           <div className="md:col-span-2">
-            <span className="text-xs uppercase tracking-wider font-semibold text-blue-300/70">Priorità / SLA</span>
+            <div className="flex items-center justify-between">
+              <span className="text-xs uppercase tracking-wider font-semibold text-blue-300/70">Priorità / SLA</span>
+              {ticket.priorityConfirmed ? (
+                <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/30">
+                  <CheckCircle2 className="h-3 w-3 text-emerald-400" />
+                  <span>Scelta Admin Convalidata</span>
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[#F3C64F] bg-[#D4AF37]/10 px-2 py-0.5 rounded border border-[#D4AF37]/30">
+                  <Crown className="h-3 w-3 text-[#D4AF37]" />
+                  <span>Stima AI Provvisoria</span>
+                </span>
+              )}
+            </div>
+
             <p className="text-sm font-semibold text-blue-100 mt-0.5 flex items-center gap-1.5">
               <Clock className="h-3.5 w-3.5 text-[#D4AF37]" />
               <span>{ticket.priority} - {ticket.sla}</span>
             </p>
+
+            {/* Quick Priority Confirmation for Admin if onConfirmPriority is available */}
+            {onConfirmPriority && !ticket.priorityConfirmed && !isChangingPriority && (
+              <div className="mt-2 pt-2 border-t border-[#1A3166]/60 flex items-center gap-2 flex-wrap">
+                <button
+                  type="button"
+                  onClick={() => onConfirmPriority(ticket.ticketId, ticket.priority)}
+                  className="rounded-lg bg-[#D4AF37] hover:bg-[#F3C64F] px-2.5 py-1 text-[11px] font-bold text-[#070F26] transition shadow cursor-pointer"
+                >
+                  ✓ Conferma {ticket.priority}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsChangingPriority(true)}
+                  className="rounded-lg border border-[#1A3166] bg-[#0E1F4B] hover:bg-[#152c66] px-2.5 py-1 text-[11px] font-semibold text-blue-200 transition cursor-pointer"
+                >
+                  Rettifica...
+                </button>
+              </div>
+            )}
+
+            {onConfirmPriority && isChangingPriority && (
+              <div className="mt-2 pt-2 border-t border-[#1A3166]/60 space-y-1.5">
+                <span className="text-[10px] uppercase font-bold text-blue-300 block">Seleziona Scelta Finale:</span>
+                <div className="flex items-center gap-1.5">
+                  {(['P1', 'P2', 'P3', 'P4'] as PriorityLevel[]).map((p) => (
+                    <button
+                      key={p}
+                      type="button"
+                      onClick={() => {
+                        onConfirmPriority(ticket.ticketId, p, 'Rettifica da visualizzatore scheda');
+                        setIsChangingPriority(false);
+                      }}
+                      className={`px-2 py-0.5 rounded text-[11px] font-bold border cursor-pointer ${
+                        ticket.priority === p 
+                          ? 'bg-[#D4AF37] text-[#070F26] border-[#D4AF37]' 
+                          : 'bg-[#0E1F4B] text-blue-200 border-[#1A3166] hover:border-[#D4AF37]/50'
+                      }`}
+                    >
+                      {p}
+                    </button>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => setIsChangingPriority(false)}
+                    className="text-[10px] text-blue-400 hover:text-white ml-1"
+                  >
+                    Annulla
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="md:col-span-2">

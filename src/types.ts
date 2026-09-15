@@ -82,6 +82,11 @@ export interface ITSMTicket {
   category: string;
   priority: PriorityLevel;
   sla: string;
+  aiSuggestedPriority?: PriorityLevel;
+  priorityConfirmed?: boolean;
+  priorityConfirmedBy?: string;
+  priorityConfirmedAt?: string;
+  priorityChangeReason?: string;
   assignedTo: string;
   assignedTechnicianId?: 'piccirilli' | 'benin' | 'padovani' | 'ayoub';
   escalationT3: boolean;

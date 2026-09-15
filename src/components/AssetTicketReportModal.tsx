@@ -302,6 +302,62 @@ export const AssetTicketReportModal: React.FC<AssetTicketReportModalProps> = ({
   }, [filteredTickets, totalCount]);
 
   // --- EXPORT HANDLERS ---
+  const handleExportPercentagesCSV = () => {
+    const headers = [
+      'Livello Priorità',
+      'Descrizione',
+      'Totale Segnalazioni',
+      'Percentuale sul Totale (%)',
+      'Ticket Chiusi o Risolti',
+      'Percentuale Chiusi (%)',
+      'Ticket Aperti o In Corso',
+      'Percentuale Aperti (%)',
+      'Tasso di Risoluzione (%)',
+      'Target SLA',
+      'MTTR Medio (Minuti)'
+    ];
+
+    const rows = criticalityBreakdown.map(item => [
+      `"${item.key}"`,
+      `"${item.label}"`,
+      item.totale,
+      `"${item.pctOfTotal}%"`,
+      item.chiusi,
+      `"${item.pctClosed}%"`,
+      item.aperti,
+      `"${item.pctOpen}%"`,
+      `"${item.pctClosed}%"`,
+      `"${item.sla}"`,
+      item.lvlMttr !== null ? item.lvlMttr : 'N/D'
+    ]);
+
+    // Summary totals row
+    rows.push([
+      `"TOTALE GENERALE"`,
+      `"Tutti i Livelli Triage"`,
+      totalCount,
+      `"100%"`,
+      resolvedCount,
+      `"${globalResolutionRate}%"`,
+      unresolvedCount,
+      `"${totalCount > 0 ? Math.round(((totalCount - resolvedCount) / totalCount) * 100) : 0}%"`,
+      `"${globalResolutionRate}%"`,
+      `"—"`,
+      avgResolutionMinutes > 0 ? avgResolutionMinutes : 'N/D'
+    ]);
+
+    const csvContent = '\uFEFF' + [headers.join(';'), ...rows.map(r => r.join(';'))].join('\r\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `ITSM_Matrice_Percentuali_Criticita_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   const handleExportCSV = () => {
     const headers = [
       'ID Ticket',
@@ -455,6 +511,17 @@ export const AssetTicketReportModal: React.FC<AssetTicketReportModalProps> = ({
 
           {/* Export Action Controls */}
           <div className="flex items-center gap-2 flex-wrap">
+            {/* Export Metrics & Percentages for Charts */}
+            <button
+              id="btn-export-percentages-csv"
+              onClick={handleExportPercentagesCSV}
+              className="flex items-center gap-1.5 rounded-xl border border-[#D4AF37]/50 bg-[#D4AF37]/15 hover:bg-[#D4AF37]/25 px-3 py-1.5 text-xs font-bold text-[#F3C64F] transition active:scale-95 shadow-sm cursor-pointer"
+              title="Esporta la matrice delle percentuali di criticità e divisione chiusi/aperti per creare grafici in Excel"
+            >
+              <BarChart2 className="h-3.5 w-3.5 text-[#D4AF37]" />
+              <span>Dati Grafici (%)</span>
+            </button>
+
             {/* Export CSV Button */}
             <button
               id="btn-export-csv"
@@ -1350,33 +1417,64 @@ export const AssetTicketReportModal: React.FC<AssetTicketReportModalProps> = ({
                           className={`hover:bg-[#0E1F4B]/50 transition ${selectedAssetId === asset.id ? 'bg-[#0E1F4B]/70' : ''}`}
                         >
                           <td className="p-3">
-                            <span className="rounded bg-[#070F24] px-2 py-0.5 font-mono font-bold text-[#F3C64F] border border-[#D4AF37]/30">
+                            <button
+                              type="button"
+                              onClick={() => onOpenSingleAsset && onOpenSingleAsset(asset)}
+                              className="rounded bg-[#070F24] hover:bg-[#D4AF37]/20 px-2 py-0.5 font-mono font-bold text-[#F3C64F] border border-[#D4AF37]/30 transition hover:border-[#D4AF37] cursor-pointer"
+                              title={`Apri la scheda e i ticket per ${asset.id}`}
+                            >
                               {asset.id}
-                            </span>
+                            </button>
                           </td>
                           <td className="p-3">
-                            <div className="font-bold text-white text-xs">{asset.name}</div>
+                            <div 
+                              onClick={() => onOpenSingleAsset && onOpenSingleAsset(asset)}
+                              className="font-bold text-white text-xs hover:text-[#F3C64F] cursor-pointer transition"
+                              title={`Vedi tutti i ticket per ${asset.name}`}
+                            >
+                              {asset.name}
+                            </div>
                             <div className="text-[11px] text-blue-300/60 truncate max-w-xs">{asset.location || asset.description}</div>
                           </td>
                           <td className="p-3 text-blue-300">
                             {asset.area}
                           </td>
                           <td className="p-3 text-center">
-                            <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-bold ${
-                              resolvedForThis > 0 
-                                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-mono'
-                                : 'text-blue-300/40'
-                            }`}>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (onOpenSingleAsset) {
+                                  onOpenSingleAsset(asset);
+                                }
+                              }}
+                              className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-bold transition cursor-pointer ${
+                                resolvedForThis > 0 
+                                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-500/30 hover:scale-105 font-mono shadow-sm'
+                                  : 'text-blue-300/40 hover:text-blue-200'
+                              }`}
+                              title={`Apri finestra con i soli ticket di ${asset.id}`}
+                            >
                               <CheckCircle2 className="h-3 w-3" />
                               <span>{resolvedForThis} risolti</span>
-                            </span>
+                            </button>
                           </td>
                           <td className="p-3 text-center">
                             {unresolvedForThis > 0 ? (
-                              <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2.5 py-0.5 text-xs font-bold font-mono">
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (onOpenSingleAsset) {
+                                    onOpenSingleAsset(asset);
+                                  }
+                                }}
+                                className="inline-flex items-center gap-1 rounded-full bg-amber-500/20 hover:bg-amber-500/30 hover:scale-105 text-amber-300 border border-amber-500/40 px-2.5 py-1 text-xs font-bold font-mono transition cursor-pointer shadow-sm"
+                                title={`Apri finestra con i soli ticket di ${asset.id}`}
+                              >
                                 <Clock className="h-3 w-3" />
                                 <span>{unresolvedForThis} aperto</span>
-                              </span>
+                              </button>
                             ) : (
                               <span className="text-[11px] text-emerald-400 font-semibold">Nessun guasto</span>
                             )}

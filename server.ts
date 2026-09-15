@@ -350,6 +350,11 @@ export interface StoredTicket {
   category: 'IT' | 'Gaming' | 'Facility' | 'F&B';
   priority: 'P1' | 'P2' | 'P3' | 'P4';
   sla: string;
+  aiSuggestedPriority?: 'P1' | 'P2' | 'P3' | 'P4';
+  priorityConfirmed?: boolean;
+  priorityConfirmedBy?: string;
+  priorityConfirmedAt?: string;
+  priorityChangeReason?: string;
   assignedTo: string;
   assignedTechnicianId: 'piccirilli' | 'benin' | 'padovani' | 'ayoub';
   escalationT3: boolean;
@@ -1020,27 +1025,14 @@ const handleCreateTicket = async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Descrizione del problema obbligatoria.' });
     }
 
-    // 1. Run deterministic classification first
+    // 1. Run AI/deterministic classification to establish initial priority automatically
     const classified = generateDeterministicTicket(userMessage);
 
-    if (priorityOverride && ['P1', 'P2', 'P3', 'P4'].includes(priorityOverride)) {
-      classified.priority = priorityOverride;
-      if (priorityOverride === 'P1') classified.sla = 'P1 Critico - Presa in carico < 15 min / Risoluzione < 2h';
-      else if (priorityOverride === 'P2') classified.sla = 'P2 Alto - Presa in carico < 30 min / Risoluzione < 4h';
-      else if (priorityOverride === 'P3') classified.sla = 'P3 Medio - Presa in carico < 2h / Risoluzione < 8h';
-      else if (priorityOverride === 'P4') classified.sla = 'P4 Basso - Presa in carico < 4h / Risoluzione < 24h';
-    } else if (urgencyOverride) {
-      if (urgencyOverride === 'Critico') {
-        classified.priority = 'P1';
-        classified.sla = 'P1 Critico - Presa in carico < 15 min / Risoluzione < 2h';
-      } else if (urgencyOverride === 'Urgente') {
-        classified.priority = 'P2';
-        classified.sla = 'P2 Alto - Presa in carico < 30 min / Risoluzione < 4h';
-      } else if (urgencyOverride === 'Normale') {
-        classified.priority = 'P3';
-        classified.sla = 'P3 Medio - Presa in carico < 2h / Risoluzione < 8h';
-      }
-    }
+    // Note: Base users cannot choose the priority.
+    // The AI/ITSM classifier automatically determines priority based on asset, damage, and business impact.
+    // The assigned Admin will have the final decision to confirm or modify this priority.
+    const initialPriority = classified.priority;
+    const initialSla = classified.sla;
 
     const techId = getTechnicianId(classified.assignedTo, classified.category);
     const techNameMap: Record<string, string> = {
@@ -1065,8 +1057,13 @@ const handleCreateTicket = async (req: Request, res: Response) => {
       userMessage: userMessage.trim(),
       asset: classified.asset,
       category: classified.category,
-      priority: classified.priority,
-      sla: classified.sla,
+      priority: initialPriority,
+      sla: initialSla,
+      aiSuggestedPriority: initialPriority,
+      priorityConfirmed: false,
+      priorityConfirmedBy: undefined,
+      priorityConfirmedAt: undefined,
+      priorityChangeReason: undefined,
       assignedTo: assignedAdminName,
       assignedTechnicianId: techId,
       escalationT3: classified.escalationT3,
@@ -1082,7 +1079,12 @@ const handleCreateTicket = async (req: Request, res: Response) => {
         },
         {
           timestamp: timeStr,
-          action: `Instradato automaticamente a: ${classified.assignedTo}`,
+          action: `Priorità ${initialPriority} valutata automaticamente dall'AI (In attesa di convalida o rettifica finale dall'Admin ${assignedAdminName})`,
+          by: 'Assistente AI ITSM'
+        },
+        {
+          timestamp: timeStr,
+          action: `Instradato automaticamente ad Admin competente: ${assignedAdminName}`,
           by: 'Sistema ITSM Triage'
         }
       ],
@@ -1171,12 +1173,95 @@ app.patch('/api/tickets/:ticketId', (req: Request, res: Response) => {
     });
   }
 
+  // Admin Priority Update / Confirmation
+  if (req.body.priority) {
+    const oldPriority = ticket.priority;
+    const newPriority = req.body.priority;
+    ticket.priority = newPriority;
+    if (newPriority === 'P1') ticket.sla = 'P1 Critico - Presa in carico < 15 min / Risoluzione < 2h';
+    else if (newPriority === 'P2') ticket.sla = 'P2 Alto - Presa in carico < 30 min / Risoluzione < 4h';
+    else if (newPriority === 'P3') ticket.sla = 'P3 Medio - Presa in carico < 2h / Risoluzione < 8h';
+    else if (newPriority === 'P4') ticket.sla = 'P4 Basso - Presa in carico < 4h / Risoluzione < 24-48h';
+
+    ticket.priorityConfirmed = true;
+    ticket.priorityConfirmedBy = updatedBy;
+    ticket.priorityConfirmedAt = now.toISOString();
+    if (req.body.priorityChangeReason) {
+      ticket.priorityChangeReason = req.body.priorityChangeReason;
+    }
+
+    const isChanged = oldPriority !== newPriority;
+    ticket.history.push({
+      timestamp: timeStr,
+      action: isChanged
+        ? `Priorità rettificata da ${oldPriority} a ${newPriority} dall'Admin ${updatedBy}${req.body.priorityChangeReason ? ` (Motivazione: ${req.body.priorityChangeReason})` : ''}`
+        : `Priorità AI (${newPriority}) convalidata e confermata dall'Admin ${updatedBy}`,
+      by: updatedBy
+    });
+  } else if (req.body.confirmPriority === true) {
+    ticket.priorityConfirmed = true;
+    ticket.priorityConfirmedBy = updatedBy;
+    ticket.priorityConfirmedAt = now.toISOString();
+    ticket.history.push({
+      timestamp: timeStr,
+      action: `Priorità AI (${ticket.priority}) convalidata e confermata dall'Admin ${updatedBy}`,
+      by: updatedBy
+    });
+  }
+
   ticketsStore[ticketIndex] = ticket;
 
   return res.json({
     success: true,
     ticket,
     message: `Ticket ${ticket.ticketId} aggiornato con successo.`
+  });
+});
+
+// REST: Dedicated endpoint for Admin to confirm or change priority
+app.post('/api/tickets/:ticketId/confirm-priority', (req: Request, res: Response) => {
+  const { ticketId } = req.params;
+  const { priority, adminName = 'Admin Assegnatario', reason = '' } = req.body;
+
+  const ticketIndex = ticketsStore.findIndex(t => t.ticketId === ticketId || t.id === ticketId);
+  if (ticketIndex === -1) {
+    return res.status(404).json({ error: 'Ticket non trovato.' });
+  }
+
+  const ticket = ticketsStore[ticketIndex];
+  const now = new Date();
+  const timeStr = now.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+  const oldPriority = ticket.priority;
+  const targetPriority = (priority && ['P1', 'P2', 'P3', 'P4'].includes(priority)) ? priority : ticket.priority;
+
+  ticket.priority = targetPriority;
+  if (targetPriority === 'P1') ticket.sla = 'P1 Critico - Presa in carico < 15 min / Risoluzione < 2h';
+  else if (targetPriority === 'P2') ticket.sla = 'P2 Alto - Presa in carico < 30 min / Risoluzione < 4h';
+  else if (targetPriority === 'P3') ticket.sla = 'P3 Medio - Presa in carico < 2h / Risoluzione < 8h';
+  else if (targetPriority === 'P4') ticket.sla = 'P4 Basso - Presa in carico < 4h / Risoluzione < 24-48h';
+
+  ticket.priorityConfirmed = true;
+  ticket.priorityConfirmedBy = adminName;
+  ticket.priorityConfirmedAt = now.toISOString();
+  if (reason) ticket.priorityChangeReason = reason;
+
+  const isChanged = oldPriority !== targetPriority;
+  ticket.history.push({
+    timestamp: timeStr,
+    action: isChanged
+      ? `Priorità rettificata da ${oldPriority} a ${targetPriority} dall'Admin ${adminName}${reason ? ` (Motivo: ${reason})` : ''}`
+      : `Priorità proposta dall'AI (${targetPriority}) confermata come decisione finale dall'Admin ${adminName}`,
+    by: adminName
+  });
+
+  ticketsStore[ticketIndex] = ticket;
+
+  return res.json({
+    success: true,
+    ticket,
+    message: isChanged 
+      ? `Priorità aggiornata a ${targetPriority} da ${adminName}.`
+      : `Priorità ${targetPriority} confermata con successo.`
   });
 });
 

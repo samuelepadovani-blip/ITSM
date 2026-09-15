@@ -18,12 +18,14 @@ interface TicketBoardViewProps {
   tickets: ITSMTicket[];
   onStatusChange: (ticketId: string, newStatus: TicketStatus) => void;
   onAskAI?: (ticket: ITSMTicket) => void;
+  onConfirmPriority?: (ticketId: string, priority: PriorityLevel, reason?: string) => void;
 }
 
 export const TicketBoardView: React.FC<TicketBoardViewProps> = ({
   tickets,
   onStatusChange,
   onAskAI,
+  onConfirmPriority,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState<string>('Tutte');
@@ -415,6 +417,7 @@ export const TicketBoardView: React.FC<TicketBoardViewProps> = ({
                 ticket={ticket}
                 onStatusChange={onStatusChange}
                 onAskAI={onAskAI}
+                onConfirmPriority={onConfirmPriority}
               />
             ))}
           </div>

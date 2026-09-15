@@ -379,6 +379,8 @@ ${needsT3
     category,
     priority,
     sla,
+    aiSuggestedPriority: priority,
+    priorityConfirmed: false,
     assignedTo,
     escalationT3: needsT3,
     escalationT3Note,

@@ -44,8 +44,6 @@ export const UserReportPortal: React.FC<UserReportPortalProps> = ({
   const [reporterName, setReporterName] = useState(currentUser?.displayName || 'Marco (Staff Centro)');
   const [reporterZone, setReporterZone] = useState('Sala Slot Nord - Postazione 14');
   const [userMessage, setUserMessage] = useState('');
-  const [selectedPriority, setSelectedPriority] = useState<PriorityLevel | 'Auto'>('Auto');
-  const [urgencyOverride, setUrgencyOverride] = useState<'Normale' | 'Urgente' | 'Critico'>('Normale');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [createdTicket, setCreatedTicket] = useState<ITSMTicket | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -147,8 +145,6 @@ export const UserReportPortal: React.FC<UserReportPortalProps> = ({
             userMessage: userMessage.trim(),
             reporterName: reporterName.trim() || 'Operatore Centro',
             reporterZone: reporterZone.trim() || 'Generale',
-            priorityOverride: selectedPriority === 'Auto' ? undefined : selectedPriority,
-            urgencyOverride,
           }),
         });
 
@@ -168,25 +164,6 @@ export const UserReportPortal: React.FC<UserReportPortalProps> = ({
         const now = new Date();
         const timeStr = now.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
 
-        if (selectedPriority !== 'Auto') {
-          local.priority = selectedPriority;
-          if (selectedPriority === 'P1') local.sla = 'P1 Critico - Presa in carico < 15 min / Risoluzione < 2h';
-          else if (selectedPriority === 'P2') local.sla = 'P2 Alto - Presa in carico < 30 min / Risoluzione < 4h';
-          else if (selectedPriority === 'P3') local.sla = 'P3 Medio - Presa in carico < 2h / Risoluzione < 8h';
-          else if (selectedPriority === 'P4') local.sla = 'P4 Basso - Presa in carico < 4h / Risoluzione < 24h';
-        } else if (urgencyOverride) {
-          if (urgencyOverride === 'Critico') {
-            local.priority = 'P1';
-            local.sla = 'P1 Critico - Presa in carico < 15 min / Risoluzione < 2h';
-          } else if (urgencyOverride === 'Urgente') {
-            local.priority = 'P2';
-            local.sla = 'P2 Alto - Presa in carico < 30 min / Risoluzione < 4h';
-          } else if (urgencyOverride === 'Normale') {
-            local.priority = 'P3';
-            local.sla = 'P3 Medio - Presa in carico < 2h / Risoluzione < 8h';
-          }
-        }
-
         created = {
           ...local,
           id: `ticket-${Date.now()}`,
@@ -195,8 +172,11 @@ export const UserReportPortal: React.FC<UserReportPortalProps> = ({
           timestamp: timeStr,
           createdAtIso: now.toISOString(),
           status: local.escalationT3 ? 'Escalato T3' : 'Aperto',
+          aiSuggestedPriority: local.priority,
+          priorityConfirmed: false,
           history: [
             { timestamp: timeStr, action: `Segnalazione inviata da: ${reporterName.trim() || 'Operatore'}`, by: reporterName.trim() || 'Operatore' },
+            { timestamp: timeStr, action: `Priorità ${local.priority} valutata automaticamente dall'AI (In attesa di convalida Admin)`, by: 'Assistente AI' },
             { timestamp: timeStr, action: `Instradato a: ${local.assignedTo}`, by: 'Sistema Triage ITSM' }
           ]
         };
@@ -261,14 +241,23 @@ export const UserReportPortal: React.FC<UserReportPortalProps> = ({
               </div>
             </div>
 
-            <span className={`px-2.5 py-1 rounded-lg text-xs font-bold font-mono border ${
-              createdTicket.priority === 'P1'
-                ? 'bg-red-500/20 text-red-300 border-red-500/40'
-                : createdTicket.priority === 'P2'
-                ? 'bg-[#D4AF37]/15 text-[#F3C64F] border-[#D4AF37]/40'
-                : 'bg-[#0E1F4B] text-blue-200 border-[#1E3975]'
-            }`}>
-              {createdTicket.priority} • {createdTicket.sla.split('-')[0]}
+            <div className="flex items-center gap-2">
+              <span className={`px-2.5 py-1 rounded-lg text-xs font-bold border ${
+                createdTicket.status === 'Risolto'
+                  ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+                  : createdTicket.status === 'In Lavorazione'
+                  ? 'bg-[#D4AF37]/15 text-[#F3C64F] border-[#D4AF37]/40'
+                  : 'bg-[#0E1F4B] text-blue-200 border-[#1E3975]'
+              }`}>
+                Stato: {createdTicket.status}
+              </span>
+            </div>
+          </div>
+
+          <div className="p-3 rounded-xl bg-[#070F24]/80 border border-[#1A3166] text-xs text-blue-200 flex items-center gap-2">
+            <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
+            <span>
+              Segnalazione inoltrata al tecnico di riferimento <strong>{createdTicket.assignedTo}</strong>. Riceverai aggiornamenti sullo stato dell'intervento.
             </span>
           </div>
 
@@ -440,58 +429,6 @@ export const UserReportPortal: React.FC<UserReportPortalProps> = ({
               />
             </div>
 
-            {/* Priority Selection P1-P4 strictly requested by user */}
-            <div className="space-y-2">
-              <div className="flex flex-wrap items-center justify-between gap-1">
-                <label className="text-xs font-bold text-blue-200 flex items-center gap-1.5">
-                  <Flame className="h-3.5 w-3.5 text-[#D4AF37]" />
-                  <span>Priorità della Segnalazione (Scelta dall'Utente) *:</span>
-                </label>
-                <span className="text-[11px] font-medium text-blue-300/80">
-                  {selectedPriority === 'P1' && '🔴 SLA Presa in carico < 15 min / Risoluzione < 2h'}
-                  {selectedPriority === 'P2' && '🟡 SLA Presa in carico < 30 min / Risoluzione < 4h'}
-                  {selectedPriority === 'P3' && '🔵 SLA Presa in carico < 2h / Risoluzione < 8h'}
-                  {selectedPriority === 'P4' && '⚪ SLA Presa in carico < 4h / Risoluzione < 24-48h'}
-                  {selectedPriority === 'Auto' && '✨ Classificazione automatica da parte dell\'ITSM'}
-                </span>
-              </div>
-
-              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
-                {[
-                  { id: 'P1' as const, label: 'P1 - Critico', sub: 'Fermo sala / Emergenza', color: 'bg-red-500/20 border-red-500 text-red-300' },
-                  { id: 'P2' as const, label: 'P2 - Alto', sub: 'Forte impatto operativo', color: 'bg-amber-500/20 border-amber-500 text-amber-300' },
-                  { id: 'P3' as const, label: 'P3 - Medio', sub: 'Anomalia ordinaria', color: 'bg-blue-500/20 border-blue-500 text-blue-200' },
-                  { id: 'P4' as const, label: 'P4 - Basso', sub: 'Richiesta minore / Estetica', color: 'bg-slate-700/40 border-slate-500 text-slate-300' },
-                  { id: 'Auto' as const, label: 'Auto (AI)', sub: 'Rilevamento Intelligente', color: 'bg-[#D4AF37]/20 border-[#D4AF37] text-[#F3C64F]' },
-                ].map((item) => (
-                  <button
-                    key={item.id}
-                    type="button"
-                    onClick={() => setSelectedPriority(item.id)}
-                    className={`rounded-xl p-2.5 text-left border transition text-xs ${
-                      selectedPriority === item.id
-                        ? `${item.color} ring-1 font-bold shadow-sm`
-                        : 'bg-[#070F24] border-[#1A3166] text-blue-200/60 hover:bg-[#0C1A3D]'
-                    }`}
-                  >
-                    <div className="font-bold">{item.label}</div>
-                    <div className="text-[10px] opacity-80 truncate">{item.sub}</div>
-                  </button>
-                ))}
-              </div>
-
-              {/* Destination Admin Routing Guide */}
-              <div className="p-3 rounded-xl bg-[#070F24]/80 border border-[#1A3166] text-[11px] text-blue-300/80 space-y-1">
-                <span className="font-bold text-[#F3C64F] block">Instradamento Automatico dell'ITSM ai 4 Admin:</span>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 text-[10.5px]">
-                  <div>• Slot, Casse, Cambiacash, Bowling ➔ <strong>Admin Lorenzo Benin</strong></div>
-                  <div>• Rete, POS, Videocamere, IT ➔ <strong>Admin Piccirilli</strong></div>
-                  <div>• Clima UTA, Luci, Audio, Allarmi ➔ <strong>Admin Padovani</strong></div>
-                  <div>• Macchine Caffè, Frigo, Spine ➔ <strong>Admin Ayoub</strong></div>
-                </div>
-              </div>
-            </div>
-
             {errorMessage && (
               <div className="rounded-xl border border-red-500/40 bg-red-950/20 p-3 text-xs text-red-300 flex items-center gap-2">
                 <AlertTriangle className="h-4 w-4 shrink-0" />
@@ -543,17 +480,6 @@ export const UserReportPortal: React.FC<UserReportPortalProps> = ({
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="font-mono font-bold text-white">#{t.ticketId}</span>
                     <span className="font-semibold text-[#F3C64F]">{t.asset}</span>
-                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${
-                      t.priority === 'P1'
-                        ? 'bg-red-950/60 text-red-300 border-red-500/40'
-                        : t.priority === 'P2'
-                        ? 'bg-[#D4AF37]/20 text-[#F3C64F] border-[#D4AF37]/50'
-                        : t.priority === 'P3'
-                        ? 'bg-blue-950/60 text-blue-300 border-blue-500/40'
-                        : 'bg-slate-900/60 text-slate-300 border-slate-600/40'
-                    }`}>
-                      {t.priority}
-                    </span>
                     <span className={`px-2 py-0.5 rounded text-[10px] font-semibold border ${
                       t.status === 'Risolto'
                         ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'

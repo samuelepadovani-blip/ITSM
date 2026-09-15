@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ITSMTicket, TicketStatus, UserAccount } from '../types';
+import { ITSMTicket, TicketStatus, UserAccount, PriorityLevel } from '../types';
 import { USER_ACCOUNTS } from '../data/accountsData';
 import { playNotificationChime } from '../utils/audio';
 import { 
@@ -33,7 +33,8 @@ import {
   X,
   KeyRound,
   UserPlus,
-  Crown
+  Crown,
+  AlertTriangle
 } from 'lucide-react';
 
 interface TechnicianInboxViewProps {
@@ -45,6 +46,7 @@ interface TechnicianInboxViewProps {
   onAddNote: (ticketId: string, note: string) => void;
   onOpenTransferModal: (ticket: ITSMTicket) => void;
   onAskAI?: (ticket: ITSMTicket) => void;
+  onConfirmPriority?: (ticketId: string, priority: PriorityLevel, reason?: string) => void;
   soundEnabled: boolean;
   onToggleSound: () => void;
   lastArrivedTicketId?: string | null;
@@ -61,6 +63,7 @@ export const TechnicianInboxView: React.FC<TechnicianInboxViewProps> = ({
   onAddNote,
   onOpenTransferModal,
   onAskAI,
+  onConfirmPriority,
   soundEnabled,
   onToggleSound,
   lastArrivedTicketId,
@@ -72,6 +75,9 @@ export const TechnicianInboxView: React.FC<TechnicianInboxViewProps> = ({
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [noteInputs, setNoteInputs] = useState<Record<string, string>>({});
   const [vendorRefInputs, setVendorRefInputs] = useState<Record<string, string>>({});
+  const [editingPriorityTicketId, setEditingPriorityTicketId] = useState<string | null>(null);
+  const [selectedPriorityByTicket, setSelectedPriorityByTicket] = useState<Record<string, PriorityLevel>>({});
+  const [reasonByTicket, setReasonByTicket] = useState<Record<string, string>>({});
 
   const canCallVendors = Boolean(currentUser.permissions?.t3Vendor || currentUser.canCallVendors || currentUser.id === 'piccirilli');
 
@@ -846,6 +852,170 @@ export const TechnicianInboxView: React.FC<TechnicianInboxViewProps> = ({
                   )}
                 </div>
               )}
+
+              {/* ADMIN FINAL PRIORITY DECISION & VALIDATION PANEL */}
+              <div className={`rounded-xl border p-3.5 space-y-2.5 transition ${
+                ticket.priorityConfirmed
+                  ? 'border-emerald-500/35 bg-emerald-950/20'
+                  : 'border-[#D4AF37]/60 bg-[#070F24] ring-1 ring-[#D4AF37]/25 shadow-lg'
+              }`}>
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    {ticket.priorityConfirmed ? (
+                      <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
+                    ) : (
+                      <Crown className="h-4 w-4 text-[#D4AF37] shrink-0" />
+                    )}
+                    <span className="text-xs font-bold text-white">
+                      {ticket.priorityConfirmed 
+                        ? `Scelta Finale Priorità: Convalidata dall'Admin` 
+                        : `Scelta Finale Priorità: In Attesa di Decisione Admin`}
+                    </span>
+                    <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full border ${
+                      ticket.priorityConfirmed
+                        ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+                        : 'bg-[#D4AF37]/20 text-[#F3C64F] border-[#D4AF37]/40 animate-pulse'
+                    }`}>
+                      {ticket.priorityConfirmed ? `Definitiva: ${ticket.priority}` : `Stima AI: ${ticket.priority}`}
+                    </span>
+                  </div>
+
+                  {ticket.priorityConfirmed && (
+                    <button
+                      type="button"
+                      onClick={() => setEditingPriorityTicketId(editingPriorityTicketId === ticket.ticketId ? null : ticket.ticketId)}
+                      className="text-[11px] font-semibold text-[#F3C64F] hover:underline flex items-center gap-1 cursor-pointer"
+                    >
+                      <span>{editingPriorityTicketId === ticket.ticketId ? 'Chiudi rettifica' : 'Modifica / Rettifica'}</span>
+                    </button>
+                  )}
+                </div>
+
+                {/* Description of status */}
+                {ticket.priorityConfirmed ? (
+                  <div className="text-[11px] text-emerald-200/80 flex flex-wrap items-center gap-2">
+                    <span>Convalidata da: <strong className="text-emerald-300">{ticket.priorityConfirmedBy || ticket.assignedTo}</strong></span>
+                    {ticket.priorityConfirmedAt && (
+                      <>
+                        <span>•</span>
+                        <span className="font-mono">{new Date(ticket.priorityConfirmedAt).toLocaleString('it-IT', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}</span>
+                      </>
+                    )}
+                    {ticket.priorityChangeReason && (
+                      <>
+                        <span>•</span>
+                        <span className="italic text-emerald-100">Motivazione: "{ticket.priorityChangeReason}"</span>
+                      </>
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-[11px] text-blue-200/90 leading-relaxed">
+                    L'utente base non può scegliere la priorità. Il sistema ha assegnato provvisoriamente <strong className="text-white font-mono">{ticket.priority} ({ticket.sla.split('-')[0].trim()})</strong>. Spetta all'Admin assegnatario confermare questa priorità o rettificarla in via definitiva.
+                  </p>
+                )}
+
+                {/* Quick Actions if NOT confirmed and NOT in edit mode */}
+                {!ticket.priorityConfirmed && editingPriorityTicketId !== ticket.ticketId && (
+                  <div className="flex flex-wrap items-center gap-2 pt-1">
+                    <button
+                      type="button"
+                      onClick={() => onConfirmPriority && onConfirmPriority(ticket.ticketId, ticket.priority)}
+                      className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-[#D4AF37] via-[#F3C64F] to-[#D4AF37] hover:brightness-110 px-3.5 py-1.5 text-xs font-extrabold text-[#070F26] shadow-md shadow-[#D4AF37]/20 transition active:scale-95 cursor-pointer"
+                    >
+                      <CheckCircle2 className="h-3.5 w-3.5" />
+                      <span>Conferma Priorità AI ({ticket.priority})</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditingPriorityTicketId(ticket.ticketId);
+                        setSelectedPriorityByTicket(prev => ({ ...prev, [ticket.ticketId]: ticket.priority }));
+                      }}
+                      className="inline-flex items-center gap-1.5 rounded-xl border border-[#1A3166] bg-[#0E1F4B] hover:bg-[#152c66] hover:border-[#D4AF37]/40 px-3 py-1.5 text-xs font-bold text-blue-200 hover:text-white transition cursor-pointer"
+                    >
+                      <AlertTriangle className="h-3.5 w-3.5 text-[#D4AF37]" />
+                      <span>Cambia / Rettifica Priorità...</span>
+                    </button>
+                  </div>
+                )}
+
+                {/* Form for changing priority (when editing) */}
+                {editingPriorityTicketId === ticket.ticketId && (
+                  <div className="pt-2 border-t border-[#1A3166] space-y-2.5">
+                    <div className="space-y-1.5">
+                      <label className="text-[11px] font-bold text-blue-300 uppercase tracking-wider block">
+                        Seleziona la priorità finale definitiva (Scelta Admin):
+                      </label>
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        {[
+                          { level: 'P1' as PriorityLevel, label: 'P1 - Critico', sub: '< 2h SLA', color: 'border-red-500 bg-red-950/40 text-red-300' },
+                          { level: 'P2' as PriorityLevel, label: 'P2 - Alto', sub: '< 4h SLA', color: 'border-amber-500 bg-amber-950/40 text-[#F3C64F]' },
+                          { level: 'P3' as PriorityLevel, label: 'P3 - Medio', sub: '< 8h SLA', color: 'border-blue-500 bg-blue-950/40 text-blue-300' },
+                          { level: 'P4' as PriorityLevel, label: 'P4 - Basso', sub: '< 24-48h SLA', color: 'border-emerald-500 bg-emerald-950/40 text-emerald-300' },
+                        ].map(p => {
+                          const isSelected = (selectedPriorityByTicket[ticket.ticketId] || ticket.priority) === p.level;
+                          return (
+                            <button
+                              key={p.level}
+                              type="button"
+                              onClick={() => setSelectedPriorityByTicket(prev => ({ ...prev, [ticket.ticketId]: p.level }))}
+                              className={`rounded-xl p-2 text-left border transition cursor-pointer ${
+                                isSelected 
+                                  ? `${p.color} ring-2 ring-[#D4AF37] font-bold shadow-lg` 
+                                  : 'border-[#1A3166] bg-[#070F24] text-blue-300 hover:border-blue-500/40'
+                              }`}
+                            >
+                              <div className="text-xs font-extrabold flex items-center justify-between">
+                                <span>{p.label}</span>
+                                {isSelected && <span className="h-1.5 w-1.5 rounded-full bg-[#D4AF37]"></span>}
+                              </div>
+                              <div className="text-[10px] text-blue-300/70 font-mono mt-0.5">{p.sub}</div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-medium text-blue-300/80 block">
+                        Motivazione della scelta / rettifica (opzionale):
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Es: Impatto limitato a un solo operatore / Macchina cassa bloccante..."
+                        value={reasonByTicket[ticket.ticketId] || ''}
+                        onChange={(e) => setReasonByTicket(prev => ({ ...prev, [ticket.ticketId]: e.target.value }))}
+                        className="w-full rounded-xl border border-[#1A3166] bg-[#070F24] px-3 py-1.5 text-xs text-white placeholder-blue-300/40 focus:border-[#D4AF37] focus:outline-none"
+                      />
+                    </div>
+
+                    <div className="flex items-center gap-2 pt-1">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const chosen = selectedPriorityByTicket[ticket.ticketId] || ticket.priority;
+                          const reason = reasonByTicket[ticket.ticketId] || '';
+                          if (onConfirmPriority) {
+                            onConfirmPriority(ticket.ticketId, chosen, reason);
+                          }
+                          setEditingPriorityTicketId(null);
+                        }}
+                        className="rounded-xl bg-gradient-to-r from-[#D4AF37] via-[#F3C64F] to-[#D4AF37] hover:brightness-110 px-4 py-1.5 text-xs font-bold text-[#070F26] shadow transition cursor-pointer"
+                      >
+                        Salva Scelta Finale Admin
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setEditingPriorityTicketId(null)}
+                        className="rounded-xl border border-[#1A3166] bg-[#070F24] hover:bg-[#0E1F4B] px-3 py-1.5 text-xs font-semibold text-blue-300 transition cursor-pointer"
+                      >
+                        Annulla
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
 
               {/* Action Buttons Toolbar */}
               <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-[#1A3166]">
