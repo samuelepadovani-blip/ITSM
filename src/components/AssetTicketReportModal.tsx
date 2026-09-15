@@ -50,6 +50,7 @@ import {
   Legend,
   CartesianGrid,
 } from 'recharts';
+import { triggerPrintableReport } from '../utils/printReport';
 
 interface AssetTicketReportModalProps {
   isOpen: boolean;
@@ -471,7 +472,33 @@ export const AssetTicketReportModal: React.FC<AssetTicketReportModalProps> = ({
   };
 
   const handlePrint = () => {
-    window.print();
+    const assetLabel = currentAsset ? `[${currentAsset.id}] ${currentAsset.name}` : `Tutti gli Apparati (${assets.length} apparati)`;
+    const areaLabel = selectedArea === 'all' ? 'Tutte le Aree Operative' : selectedArea;
+    const timeLabel = 
+      selectedTimeRange === 'today' ? 'Oggi' :
+      selectedTimeRange === 'week' ? 'Ultimi 7 Giorni' :
+      selectedTimeRange === 'month' ? 'Ultimi 30 Giorni' : 'Tutto lo Storico';
+
+    triggerPrintableReport({
+      title: 'Report Statistico KPI & Grafici ITSM Gaming Hall',
+      subtitle: 'Prospetto Operativo Ufficiale: Sintesi Ticket, Percentuali per Criticità e Grafici Comparativi',
+      filterSummary: {
+        assetLabel,
+        areaLabel,
+        timeRangeLabel: timeLabel,
+        generatedAt: new Date().toLocaleString('it-IT'),
+      },
+      metrics: {
+        totalCount,
+        resolvedCount,
+        unresolvedCount,
+        resolutionRate: globalResolutionRate,
+        avgResolutionMinutes,
+      },
+      criticalityBreakdown,
+      tickets: filteredTickets,
+      assets,
+    });
   };
 
   if (!isOpen) return null;

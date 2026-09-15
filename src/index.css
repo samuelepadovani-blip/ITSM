@@ -4,3 +4,72 @@ body {
   background-color: #060d1f;
   color: #f1f5f9;
 }
+
+/* ========================================================================= */
+/* PRINT MEDIA STYLES: Ensured visibility & high-contrast printable document */
+/* ========================================================================= */
+@media print {
+  /* Reset background and text colors for paper/PDF */
+  body, html {
+    background: #ffffff !important;
+    color: #000000 !important;
+    overflow: visible !important;
+    height: auto !important;
+  }
+
+  /* Hide main navigation, background elements, fixed bars */
+  nav, 
+  header, 
+  footer, 
+  button, 
+  .no-print,
+  #navbar-root,
+  .backdrop-blur-md {
+    display: none !important;
+  }
+
+  /* Ensure printable modal containers fill page and render cleanly */
+  #itsm-report-printable-container,
+  #single-asset-printable-container {
+    position: static !important;
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: none !important;
+    height: auto !important;
+    overflow: visible !important;
+    border: none !important;
+    box-shadow: none !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Allow text to be dark and crisp */
+  #itsm-report-printable-container *,
+  #single-asset-printable-container * {
+    color: #0f172a !important;
+    border-color: #cbd5e1 !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  /* Keep table borders visible */
+  table, th, td {
+    border: 1px solid #cbd5e1 !important;
+    page-break-inside: avoid;
+  }
+
+  th {
+    background-color: #f1f5f9 !important;
+    color: #0f172a !important;
+    font-weight: bold !important;
+  }
+
+  /* Force page breaks cleanly */
+  .page-break-before {
+    page-break-before: always;
+  }
+}

@@ -23,9 +23,11 @@ import {
   FileText,
   Plus,
   Download,
-  FileSpreadsheet
+  FileSpreadsheet,
+  Printer
 } from 'lucide-react';
 import { isTicketForAsset, getElapsedTime, formatDuration } from './AssetTicketReportModal';
+import { triggerPrintableSingleAsset } from '../utils/printReport';
 
 interface SingleAssetTicketsModalProps {
   isOpen: boolean;
@@ -198,6 +200,7 @@ export const SingleAssetTicketsModal: React.FC<SingleAssetTicketsModalProps> = (
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200">
       <div 
+        id="single-asset-printable-container"
         className="relative flex flex-col w-full max-w-4xl max-h-[92vh] rounded-2xl border border-[#1A3166] bg-[#070F26] text-white shadow-2xl overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
@@ -245,6 +248,15 @@ export const SingleAssetTicketsModal: React.FC<SingleAssetTicketsModalProps> = (
 
             {/* Action Buttons */}
             <div className="flex items-center gap-2">
+              <button
+                onClick={() => triggerPrintableSingleAsset(asset, assetTickets)}
+                className="flex items-center gap-1.5 rounded-xl border border-[#D4AF37]/40 bg-[#D4AF37]/15 hover:bg-[#D4AF37]/25 px-3 py-1.5 text-xs font-bold text-[#F3C64F] transition active:scale-95 shadow-sm cursor-pointer"
+                title={`Stampa la scheda e lo storico interventi di ${asset.id}`}
+              >
+                <Printer className="h-4 w-4 text-[#D4AF37]" />
+                <span className="hidden sm:inline">Stampa</span>
+              </button>
+
               <button
                 onClick={handleExportAssetCSV}
                 className="flex items-center gap-1.5 rounded-xl border border-emerald-500/40 bg-emerald-500/15 hover:bg-emerald-500/25 px-3 py-1.5 text-xs font-bold text-emerald-300 transition active:scale-95 shadow-sm cursor-pointer"
